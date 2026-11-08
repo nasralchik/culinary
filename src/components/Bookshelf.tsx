@@ -29,7 +29,7 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
           <div className="shelf-plank"><i /><i /><i /></div>
         </div>
       ))}
-      <div className="cabinet-base"><span>✧</span> ДОБРО ПОЖАЛОВАТЬ К СТОЛУ <span>✧</span></div>
+      <div className="cabinet-base" aria-hidden="true" />
     </div>
   )
 }
