@@ -8,4 +8,6 @@ export interface RecipeBook {
   color: string
   accent: string
   featured?: boolean
+  art?: string
+  artImage?: string
 }
