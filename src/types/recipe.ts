@@ -7,6 +7,5 @@ export interface RecipeBook {
   category: RecipeCategory
   color: string
   accent: string
-  recipes: number
   featured?: boolean
 }
