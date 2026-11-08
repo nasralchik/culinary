@@ -56,13 +56,14 @@ function App() {
           <SearchBar value={search} onChange={setSearch} />
           <CategoryFilter categories={categories} selected={category} onSelect={setCategory} />
           {filteredBooks.length > 0 ? <Bookshelf books={filteredBooks} onBookSelect={setSelectedBook} /> : <div className="empty-state"><span>⌕</span><h3>Книга не нашлась</h3><p>Попробуйте изменить запрос или выбрать другой раздел.</p></div>}
-          <p className="shelf-caption"><span>✦</span> Каждая книга хранит {filteredBooks.reduce((total, book) => total + book.recipes, 0)} проверенных рецептов <span>✦</span></p>
-          {publishedRecipeCount !== null && <p className="archive-status" role="status">В цифровом архиве опубликовано рецептов: <strong>{publishedRecipeCount}</strong></p>}
+          {publishedRecipeCount !== null
+            ? <p className="shelf-caption"><span>✦</span> В цифровом архиве опубликовано рецептов: <strong>{publishedRecipeCount}</strong> <span>✦</span></p>
+            : <p className="shelf-caption"><span>✦</span> Выберите книгу, чтобы открыть собрание рецептов <span>✦</span></p>}
           {connectionError && <p className="archive-status error" role="status">Не удалось связаться с архивом. Показана библиотека-пример.</p>}
         </section>
       </main>
       <footer className="site-footer" id="about"><span>Кулинарная библиотека</span><span>С теплом и памятью о доме <i>✦</i></span><span>Храните, готовьте, передавайте</span></footer>
-      {selectedBook && <div className="dialog-backdrop" role="presentation" onClick={() => setSelectedBook(null)}><section className="book-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}><button className="dialog-close" onClick={() => setSelectedBook(null)} aria-label="Закрыть">×</button><p className="eyebrow small">КНИГА ИЗ СОБРАНИЯ</p><h2 id="dialog-title">{selectedBook.title}</h2><p>{selectedBook.subtitle}</p><div className="dialog-rule" /><p className="dialog-meta">{selectedBook.recipes} рецептов · {selectedBook.category}</p><span className="dialog-note">Скоро здесь откроются страницы с рецептами.</span></section></div>}
+      {selectedBook && <div className="dialog-backdrop" role="presentation" onClick={() => setSelectedBook(null)}><section className="book-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}><button className="dialog-close" onClick={() => setSelectedBook(null)} aria-label="Закрыть">×</button><p className="eyebrow small">КНИГА ИЗ СОБРАНИЯ</p><h2 id="dialog-title">{selectedBook.title}</h2><p>{selectedBook.subtitle}</p><div className="dialog-rule" /><p className="dialog-meta">{selectedBook.category}</p><span className="dialog-note">Скоро здесь откроются страницы с рецептами.</span></section></div>}
     </div>
   )
 }
