@@ -1,6 +1,6 @@
 import type { RecipeBook } from '../types/recipe'
 
-export const categories = ['Все книги', 'Первые блюда', 'Выпечка', 'Основные блюда', 'Десерты', 'Заготовки'] as const
+export const categories = ['Все рецепты', 'Первые блюда', 'Выпечка', 'Основные блюда', 'Десерты', 'Заготовки'] as const
 
 export const books: RecipeBook[] = [
   { id: 'soups', title: 'Супы русской усадьбы', subtitle: 'Душистые и наваристые', category: 'Первые блюда', color: '#405b43', accent: '#d7b66a', featured: true },
