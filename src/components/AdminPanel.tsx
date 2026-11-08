@@ -67,11 +67,11 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   const [draft, setDraft] = useState<RecipeDraft>(emptyDraft)
   const [ingredients, setIngredients] = useState<IngredientDraft[]>([{ name: '', quantity: '', unit: '', note: '' }])
   const [steps, setSteps] = useState<string[]>([''])
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim()
 
   async function loadAdminData(currentUser: User) {
     if (!supabase) return
@@ -106,9 +106,11 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     let active = true
-    if (!supabase) {
+    if (!supabase || !adminEmail) {
       setChecking(false)
-      setError('Supabase не настроен. Проверьте переменные VITE_SUPABASE_URL и VITE_SUPABASE_PUBLISHABLE_KEY в Render.')
+      setError(!supabase
+        ? 'Supabase не настроен. Проверьте переменные VITE_SUPABASE_URL и VITE_SUPABASE_PUBLISHABLE_KEY в Render.'
+        : 'Email администратора не настроен. Добавьте VITE_ADMIN_EMAIL в Render.')
       return () => { active = false }
     }
     supabase.auth.getSession().then(({ data }) => {
@@ -121,10 +123,10 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
 
   async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!supabase) return
+    if (!supabase || !adminEmail) return
     setBusy(true)
     setError('')
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email: adminEmail, password })
     if (signInError || !data.user) {
       setError(signInError?.message ?? 'Вход не выполнен.')
     } else {
@@ -260,17 +262,17 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
           <button className="dialog-close" onClick={onClose} aria-label="Закрыть">×</button>
         </div>
         {!supabase && <p className="admin-error">{error}</p>}
+        {supabase && !checking && !adminEmail && <p className="admin-error">{error}</p>}
         {supabase && checking && <p className="admin-muted">Проверяем доступ…</p>}
-        {supabase && !checking && !user && <form className="admin-login" onSubmit={signIn}>
-          <p>Войдите, чтобы добавлять и редактировать рецепты.</p>
-          <label>Email<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" required /></label>
+        {supabase && !checking && adminEmail && !user && <form className="admin-login" onSubmit={signIn}>
+          <p>Введите пароль администратора.</p>
           <label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required /></label>
           {error && <p className="admin-error" role="alert">{error}</p>}
           <button className="admin-primary" disabled={busy}>{busy ? 'Входим…' : 'Войти'}</button>
         </form>}
         {supabase && !checking && user && !isAdmin && <div className="admin-login"><p>Этот пользователь не имеет прав администратора.</p>{error && <p className="admin-error" role="alert">{error}</p>}<button className="admin-secondary" onClick={signOut}>Выйти</button></div>}
         {supabase && !checking && isAdmin && <>
-          <div className="admin-toolbar"><span>{user?.email}</span><div><button className="admin-secondary" onClick={resetDraft}>Новый рецепт</button><button className="admin-secondary" onClick={signOut}>Выйти</button></div></div>
+          <div className="admin-toolbar"><span>Управление рецептами</span><div><button className="admin-secondary" onClick={resetDraft}>Новый рецепт</button><button className="admin-secondary" onClick={signOut}>Выйти</button></div></div>
           <div className="admin-content">
             <aside className="admin-recipe-list"><h3>Рецепты ({recipes.length})</h3>{recipes.length === 0 && <p className="admin-muted">Пока рецептов нет.</p>}{recipes.map((recipe) => <div className="admin-recipe-row" key={recipe.id}><button onClick={() => void editRecipe(recipe)} disabled={busy}><strong>{recipe.title}</strong><small>{recipe.is_published ? 'Опубликован' : 'Черновик'}</small></button></div>)}</aside>
             <form className="recipe-form" onSubmit={saveRecipe}>
