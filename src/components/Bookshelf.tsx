@@ -7,7 +7,17 @@ interface BookshelfProps {
 }
 
 export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
-  const rows = Array.from({ length: 5 }, (_, row) => books.slice(row * 3, row * 3 + 3))
+  const rowCount = Math.min(5, books.length)
+  const rows: RecipeBook[][] = []
+  let offset = 0
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    const rowsLeft = rowCount - rowIndex
+    const booksLeft = books.length - offset
+    const size = Math.ceil(booksLeft / rowsLeft)
+    const row = books.slice(offset, offset + size)
+    offset += size
+    rows.push(row)
+  }
   return (
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
       <div className="cabinet-crown"><span>✧</span><span>СОБРАНИЕ СЕМЕЙНЫХ РЕЦЕПТОВ</span><span>✧</span></div>
@@ -15,7 +25,6 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
         <div className="shelf-row" key={index}>
           <div className="shelf-books">
             {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
-            {row.length < 3 && <div className="shelf-note"><span>✦</span><small>Здесь появятся<br />новые истории</small></div>}
           </div>
           <div className="shelf-plank"><i /><i /><i /></div>
         </div>
