@@ -1,0 +1,26 @@
+import type { RecipeBook } from '../types/recipe'
+import { BookSpine } from './BookSpine'
+
+interface BookshelfProps {
+  books: RecipeBook[]
+  onBookSelect: (book: RecipeBook) => void
+}
+
+export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
+  const rows = Array.from({ length: 5 }, (_, row) => books.slice(row * 3, row * 3 + 3))
+  return (
+    <div className="shelf-cabinet" aria-label="Библиотека рецептов">
+      <div className="cabinet-crown"><span>✧</span><span>СОБРАНИЕ СЕМЕЙНЫХ РЕЦЕПТОВ</span><span>✧</span></div>
+      {rows.map((row, index) => (
+        <div className="shelf-row" key={index}>
+          <div className="shelf-books">
+            {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
+            {row.length < 3 && <div className="shelf-note"><span>✦</span><small>Здесь появятся<br />новые истории</small></div>}
+          </div>
+          <div className="shelf-plank"><i /><i /><i /></div>
+        </div>
+      ))}
+      <div className="cabinet-base"><span>✧</span> ДОБРО ПОЖАЛОВАТЬ К СТОЛУ <span>✧</span></div>
+    </div>
+  )
+}
