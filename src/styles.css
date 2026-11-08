@@ -204,3 +204,88 @@
 .cabinet-crown:before,.cabinet-crown:after,.cabinet-base:before,.cabinet-base:after{content:none}
 @media(max-width:720px){.library-tools .search-box{flex-basis:calc(100% - 59px)}}
 @media(max-width:520px){.admin-entry{flex-basis:44px;width:44px;height:44px}.library-tools .search-box{flex-basis:calc(100% - 56px)}}
+
+/* A warmer, older material treatment inspired by the carved reference cabinet. */
+.app-shell{
+  background-color:#d1bd97;
+  background-image:
+    radial-gradient(ellipse at 50% 18%,rgba(255,247,222,.72),transparent 48%),
+    linear-gradient(90deg,transparent 0 16.4%,rgba(103,75,42,.055) 16.5%,transparent 16.7% 49.8%,rgba(103,75,42,.045) 50%,transparent 50.2% 83.2%,rgba(103,75,42,.05) 83.3%,transparent 83.5%),
+    linear-gradient(0deg,transparent 0 24.8%,rgba(103,75,42,.055) 25%,transparent 25.2% 49.8%,rgba(103,75,42,.045) 50%,transparent 50.2% 74.8%,rgba(103,75,42,.05) 75%,transparent 75.2%),
+    linear-gradient(112deg,#cbb58d,#eadbb9 48%,#d1bb91);
+}
+.shelf-cabinet{
+  background:
+    linear-gradient(90deg,rgba(45,27,14,.74),transparent 4%,transparent 96%,rgba(45,27,14,.74)),
+    repeating-linear-gradient(0deg,rgba(255,220,154,.055) 0 2px,transparent 2px 7px,rgba(42,25,13,.055) 8px 9px,transparent 10px 19px),
+    linear-gradient(100deg,#603d24,#a77843 6%,#704729 12%,#865a35 50%,#704729 88%,#a77843 94%,#603d24);
+  border-color:#54371f;
+  box-shadow:0 20px 36px rgba(47,29,14,.42),inset 0 0 0 4px #d0a866,inset 0 0 0 7px #50321d,inset 0 0 0 10px rgba(230,194,127,.58),inset 0 0 26px rgba(27,17,9,.38);
+}
+.shelf-cabinet:before{border:1px solid rgba(244,211,148,.78);box-shadow:inset 0 0 0 3px rgba(54,33,18,.32),0 0 0 1px rgba(46,28,15,.48)}
+.cabinet-crown{
+  background:repeating-linear-gradient(0deg,rgba(255,221,160,.055) 0 2px,transparent 3px 8px),linear-gradient(180deg,#4d301a,#895a30 30%,#694323 78%,#442a17);
+  box-shadow:inset 0 1px #f0d494,inset 0 3px 5px rgba(255,219,151,.18),inset 0 -2px #c29450,0 5px 9px rgba(37,23,12,.48);
+}
+.shelf-row{
+  background:
+    linear-gradient(90deg,rgba(34,20,11,.42),transparent 8%,transparent 92%,rgba(34,20,11,.42)),
+    repeating-linear-gradient(0deg,rgba(248,207,139,.045) 0 2px,transparent 3px 11px,rgba(30,18,10,.055) 12px 13px,transparent 14px 24px),
+    linear-gradient(90deg,rgba(38,23,12,.12),rgba(119,75,38,.15) 18%,rgba(147,97,52,.2) 50%,rgba(104,65,34,.15) 82%,rgba(38,23,12,.2));
+}
+.shelf-plank{
+  background:repeating-linear-gradient(0deg,rgba(255,225,164,.08) 0 2px,transparent 2px 6px),linear-gradient(180deg,#f0d18d 0%,#c08d4b 18%,#81542d 61%,#4d301a 100%);
+  box-shadow:0 8px 11px rgba(28,18,10,.52),inset 0 2px 1px #f8dfaa,inset 0 -2px #392315;
+}
+.book-spine{filter:saturate(1.12);box-shadow:inset 0 0 0 2px rgba(226,190,112,.5),inset 0 0 0 5px rgba(31,22,14,.24),3px 6px 10px rgba(25,15,8,.57)}
+.paper-grain{opacity:.32;mix-blend-mode:multiply}
+.search-box{
+  background:linear-gradient(180deg,rgba(255,247,225,.88),rgba(224,205,166,.72));
+  border:1px solid #9c7947;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.78),inset 0 -2px 4px rgba(105,75,38,.12),0 3px 7px rgba(79,52,24,.14);
+}
+.category-chip{
+  border-color:#a48250;
+  background:linear-gradient(180deg,#f0e1c0,#d9c397);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.62),0 2px 3px rgba(69,46,22,.16);
+  text-shadow:0 1px rgba(255,255,255,.5);
+}
+.category-chip.selected{
+  background:linear-gradient(180deg,#49634b,#263d30 72%,#1d3026);
+  border-color:#1d3026;
+  box-shadow:inset 0 1px 0 rgba(220,202,143,.55),inset 0 -2px 2px rgba(5,15,9,.35),0 3px 6px rgba(25,35,25,.3);
+  text-shadow:0 1px 1px #18281e;
+}
+.shelf-cabinet:after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 12px 12px,#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),
+    radial-gradient(ellipse at calc(100% - 12px) 12px,#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),
+    radial-gradient(ellipse at 12px calc(100% - 12px),#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),
+    radial-gradient(ellipse at calc(100% - 12px) calc(100% - 12px),#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),
+    linear-gradient(90deg,#442a18 0,#c49655 4px,#714725 9px,#4c301c 15px,transparent 25px,transparent calc(100% - 25px),#4c301c calc(100% - 15px),#714725 calc(100% - 9px),#c49655 calc(100% - 4px),#442a18 100%);
+  box-shadow:inset 0 0 0 3px rgba(235,197,123,.72),inset 0 0 0 6px rgba(49,29,15,.72),inset 0 0 0 10px rgba(240,204,134,.35);
+}
+.shelf-row{isolation:isolate}
+.shelf-plank{
+  height:23px;
+  border-top:2px solid #f1d397;
+  border-bottom:3px solid #3b2516;
+  box-shadow:0 9px 13px rgba(28,18,10,.58),inset 0 2px 1px #fff0bd,inset 0 -2px #51331d;
+}
+.book-spine{
+  border-radius:5px 6px 2px 2px;
+  background:
+    linear-gradient(105deg,rgba(14,10,7,.52),transparent 13%,rgba(255,230,172,.25) 25%,transparent 42%,rgba(18,12,8,.08) 71%,rgba(12,8,5,.4)),
+    radial-gradient(ellipse at 48% 2%,rgba(255,228,166,.22),transparent 57%),
+    repeating-linear-gradient(0deg,rgba(31,19,11,.09) 0 1px,rgba(235,198,119,.035) 2px 4px,transparent 5px 9px),
+    var(--book-color);
+  box-shadow:inset 0 0 0 2px rgba(239,208,137,.7),inset 0 0 0 5px rgba(31,22,14,.34),inset 5px 0 8px rgba(0,0,0,.2),4px 7px 11px rgba(25,15,8,.62);
+}
+.book-spine:before{inset:9px 8px;border-width:2px;box-shadow:inset 0 0 0 2px rgba(18,13,8,.22)}
+.book-title{text-shadow:0 1px 1px rgba(26,16,8,.95),0 0 9px rgba(247,214,144,.18)}
+@media(max-width:520px){.shelf-cabinet:after{background:radial-gradient(ellipse at 9px 9px,#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),radial-gradient(ellipse at calc(100% - 9px) 9px,#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),linear-gradient(90deg,#442a18 0,#c49655 3px,#714725 7px,#4c301c 10px,transparent 16px,transparent calc(100% - 16px),#4c301c calc(100% - 10px),#714725 calc(100% - 7px),#c49655 calc(100% - 3px),#442a18 100%);box-shadow:inset 0 0 0 3px rgba(235,197,123,.72),inset 0 0 0 6px rgba(49,29,15,.72)}}
