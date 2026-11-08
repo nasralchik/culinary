@@ -1,15 +1,34 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { books, categories } from './data/books'
+import { getPublishedRecipeCount } from './data/recipeRepository'
 import { Bookshelf } from './components/Bookshelf'
 import { CategoryFilter } from './components/CategoryFilter'
 import { Header } from './components/Header'
 import { SearchBar } from './components/SearchBar'
 import type { RecipeBook } from './types/recipe'
+import { supabase } from './lib/supabase'
 
 function App() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<string>('Все книги')
   const [selectedBook, setSelectedBook] = useState<RecipeBook | null>(null)
+  const [publishedRecipeCount, setPublishedRecipeCount] = useState<number | null>(null)
+  const [connectionError, setConnectionError] = useState(false)
+
+  useEffect(() => {
+    if (!supabase) return
+
+    let active = true
+    getPublishedRecipeCount()
+      .then((count) => {
+        if (active) setPublishedRecipeCount(count)
+      })
+      .catch(() => {
+        if (active) setConnectionError(true)
+      })
+
+    return () => { active = false }
+  }, [])
 
   const filteredBooks = useMemo(() => books.filter((book) => {
     const matchesCategory = category === 'Все книги' || book.category === category
@@ -38,6 +57,8 @@ function App() {
           <CategoryFilter categories={categories} selected={category} onSelect={setCategory} />
           {filteredBooks.length > 0 ? <Bookshelf books={filteredBooks} onBookSelect={setSelectedBook} /> : <div className="empty-state"><span>⌕</span><h3>Книга не нашлась</h3><p>Попробуйте изменить запрос или выбрать другой раздел.</p></div>}
           <p className="shelf-caption"><span>✦</span> Каждая книга хранит {filteredBooks.reduce((total, book) => total + book.recipes, 0)} проверенных рецептов <span>✦</span></p>
+          {publishedRecipeCount !== null && <p className="archive-status" role="status">В цифровом архиве опубликовано рецептов: <strong>{publishedRecipeCount}</strong></p>}
+          {connectionError && <p className="archive-status error" role="status">Не удалось связаться с архивом. Показана библиотека-пример.</p>}
         </section>
       </main>
       <footer className="site-footer" id="about"><span>Кулинарная библиотека</span><span>С теплом и памятью о доме <i>✦</i></span><span>Храните, готовьте, передавайте</span></footer>
