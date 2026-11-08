@@ -72,6 +72,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim()
+  const loginView = Boolean(supabase && adminEmail && !checking && !user)
 
   async function loadAdminData(currentUser: User) {
     if (!supabase) return
@@ -130,6 +131,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
     if (signInError || !data.user) {
       setError(signInError?.message ?? 'Вход не выполнен.')
     } else {
+      setPassword('')
       await loadAdminData(data.user)
     }
     setBusy(false)
@@ -139,6 +141,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
     if (supabase) await supabase.auth.signOut()
     setUser(null)
     setIsAdmin(false)
+    setPassword('')
     setRecipes([])
     setDraft(emptyDraft)
     setNotice('')
@@ -255,18 +258,16 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="admin-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
-      <section className="admin-panel" role="dialog" aria-modal="true" aria-labelledby="admin-title">
-        <div className="admin-heading">
-          <div><p className="eyebrow small">КУЛИНАРНАЯ БИБЛИОТЕКА</p><h2 id="admin-title">Панель администратора</h2></div>
-          <button className="dialog-close" onClick={onClose} aria-label="Закрыть">×</button>
-        </div>
+    <div className="admin-overlay" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) onClose() }}>
+      <section className={`admin-panel ${loginView ? 'admin-panel-login' : ''}`} role="dialog" aria-modal="true" aria-label={loginView ? 'Вход администратора' : 'Панель администратора'}>
+        {!loginView && <div className="admin-heading">
+          <div><p className="eyebrow small">КУЛИНАРНАЯ БИБЛИОТЕКА</p><h2>Панель администратора</h2></div>
+        </div>}
         {!supabase && <p className="admin-error">{error}</p>}
         {supabase && !checking && !adminEmail && <p className="admin-error">{error}</p>}
         {supabase && checking && <p className="admin-muted">Проверяем доступ…</p>}
         {supabase && !checking && adminEmail && !user && <form className="admin-login" onSubmit={signIn}>
-          <p>Введите пароль администратора.</p>
-          <label>Пароль<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required /></label>
+          <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" aria-label="Пароль администратора" placeholder="Пароль" required />
           {error && <p className="admin-error" role="alert">{error}</p>}
           <button className="admin-primary" disabled={busy}>{busy ? 'Входим…' : 'Войти'}</button>
         </form>}
