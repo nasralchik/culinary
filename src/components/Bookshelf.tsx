@@ -1,4 +1,5 @@
 import type { RecipeBook } from '../types/recipe'
+import { categories } from '../data/books'
 import { BookSpine } from './BookSpine'
 
 interface BookshelfProps {
@@ -7,14 +8,15 @@ interface BookshelfProps {
 }
 
 export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
-  const rowCount = Math.min(5, books.length)
+  const displayBooks = [...books].sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category))
+  const rowCount = displayBooks.length ? 5 : 0
   const rows: RecipeBook[][] = []
   let offset = 0
   for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
     const rowsLeft = rowCount - rowIndex
-    const booksLeft = books.length - offset
-    const size = Math.ceil(booksLeft / rowsLeft)
-    const row = books.slice(offset, offset + size)
+    const booksLeft = displayBooks.length - offset
+    const size = displayBooks.length <= 5 ? (rowIndex === 0 ? booksLeft : 0) : Math.ceil(booksLeft / rowsLeft)
+    const row = displayBooks.slice(offset, offset + size)
     offset += size
     rows.push(row)
   }
@@ -23,6 +25,7 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
       <div className="cabinet-crown" aria-hidden="true" />
       {rows.map((row, index) => (
         <div className="shelf-row" key={index}>
+          {row.length > 0 && <div className="shelf-row-label" aria-hidden="true"><span>{['I', 'II', 'III', 'IV', 'V'][index]}.</span> {row[0].category}</div>}
           <div className="shelf-books">
             {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
           </div>
