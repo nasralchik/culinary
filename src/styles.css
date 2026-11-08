@@ -124,9 +124,9 @@
 }
 .library-tools{display:flex;align-items:stretch;gap:12px}
 .library-tools .search-box{flex:1;min-width:0}
-.admin-entry{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:9px;padding:0 17px;border:1px solid #76552f;background:linear-gradient(180deg,#765234,#4e3420);box-shadow:inset 0 1px rgba(239,211,158,.5),0 2px 5px rgba(46,29,15,.23);color:#f0d69c;font-family:inherit;font-size:12px;letter-spacing:.04em;cursor:pointer}
-.admin-entry:hover{background:linear-gradient(180deg,#87633d,#5d3c23);border-color:#bd965b}
-.admin-entry span{font-size:16px}
+.admin-entry{flex:0 0 36px;width:36px;height:36px;display:grid;place-items:center;padding:0;border:1px solid rgba(118,85,47,.36);border-radius:50%;background:rgba(237,222,190,.42);box-shadow:inset 0 1px rgba(255,255,255,.42);color:#715a39;font-family:inherit;font-size:17px;cursor:pointer;opacity:.76;transition:opacity .2s,background .2s,border-color .2s}
+.admin-entry:hover,.admin-entry:focus-visible{opacity:1;background:rgba(247,236,211,.9);border-color:#9e7b48;outline:2px solid rgba(158,123,72,.2);outline-offset:2px}
+.admin-entry span{line-height:1}
 .admin-overlay{position:fixed;z-index:10;inset:0;background:rgba(24,18,12,.72);display:grid;place-items:center;padding:18px}
 .admin-panel{width:min(1120px,100%);max-height:min(94vh,980px);overflow:auto;position:relative;padding:26px;background:linear-gradient(140deg,#eee1c5,#d9c49b);border:4px solid #634326;box-shadow:0 24px 80px rgba(10,8,5,.65),inset 0 0 0 3px #c19a5c,inset 0 0 0 6px #775333;color:#493923}
 .admin-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:0 12px 17px;border-bottom:1px solid rgba(110,78,42,.3)}
@@ -164,7 +164,7 @@
 .admin-error{padding:10px 12px;background:#f5ddd2;border:1px solid #be8978;color:#813c32;font-size:12px}
 .admin-notice,.admin-muted{color:#736044;font-size:12px}.admin-notice{margin:0}
 @media(max-width:720px){
-  .library-tools{flex-wrap:wrap}.library-tools .search-box{flex-basis:100%}.admin-entry{height:40px;margin-left:auto}
+  .library-tools{flex-wrap:wrap}.library-tools .search-box{flex:1 1 auto;flex-basis:calc(100% - 48px)}.admin-entry{height:36px;margin-left:auto}
   .admin-panel{padding:20px 16px}.admin-content{grid-template-columns:1fr;gap:12px}.admin-recipe-list{max-height:180px;overflow:auto;border-bottom:1px solid #b89b67;padding-bottom:10px}
   .admin-toolbar{align-items:flex-start;flex-direction:column}.admin-field-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
