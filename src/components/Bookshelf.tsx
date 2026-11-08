@@ -20,7 +20,7 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
   }
   return (
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
-      <div className="cabinet-crown"><span>✧</span><span>СОБРАНИЕ СЕМЕЙНЫХ РЕЦЕПТОВ</span><span>✧</span></div>
+      <div className="cabinet-crown" aria-hidden="true" />
       {rows.map((row, index) => (
         <div className="shelf-row" key={index}>
           <div className="shelf-books">

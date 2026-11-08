@@ -8,7 +8,6 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
     <label className="search-box">
       <span className="search-icon" aria-hidden="true">⌕</span>
       <input type="search" value={value} onChange={(event) => onChange(event.target.value)} placeholder="Найдите рецепт или любимое блюдо…" aria-label="Поиск рецептов" />
-      <span className="search-hint">⌘ K</span>
     </label>
   )
 }
