@@ -196,3 +196,11 @@
 .recipe-detail-section ul li{display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px dotted #b69a67}
 .recipe-detail-section ul li span:last-child{text-align:right;color:#7c6541}
 .recipe-video-link{display:inline-block;margin-top:18px;color:#7b4039;font-size:13px}
+
+/* Align the compact admin control with search; keep cabinet trim unlettered. */
+.admin-entry{flex:0 0 47px;width:47px;height:47px;border-radius:2px;font-size:0}
+.admin-entry svg{display:block;width:19px;height:19px}
+.admin-entry span{display:none}
+.cabinet-crown:before,.cabinet-crown:after,.cabinet-base:before,.cabinet-base:after{content:none}
+@media(max-width:720px){.library-tools .search-box{flex-basis:calc(100% - 59px)}}
+@media(max-width:520px){.admin-entry{flex-basis:44px;width:44px;height:44px}.library-tools .search-box{flex-basis:calc(100% - 56px)}}
