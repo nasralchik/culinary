@@ -15,9 +15,8 @@
         <div class="paper-grain" aria-hidden="true"></div>
         <main id="library">
           <section class="library-section" aria-label="Коллекция рецептов">
-            <div class="section-heading"><div><p class="eyebrow small">НАШЕ СОБРАНИЕ</p><h2>Книжные полки</h2></div><p class="book-count"><strong id="book-count">12</strong> книг в собрании</p></div>
-            <label class="search-box"><span class="search-icon" aria-hidden="true">⌕</span><input id="book-search" type="search" placeholder="Найдите книгу или любимое блюдо…" aria-label="Поиск рецептов"><span class="search-hint">⌘ K</span></label>
-            <div class="category-list" role="group" aria-label="Фильтр по разделам"><button class="category-chip selected" aria-pressed="true">Все книги</button><button class="category-chip" aria-pressed="false">Первые блюда</button><button class="category-chip" aria-pressed="false">Выпечка</button><button class="category-chip" aria-pressed="false">Основные блюда</button><button class="category-chip" aria-pressed="false">Десерты</button><button class="category-chip" aria-pressed="false">Заготовки</button></div>
+            <div class="library-tools"><label class="search-box"><span class="search-icon" aria-hidden="true">⌕</span><input id="book-search" type="search" placeholder="Найдите рецепт или любимое блюдо…" aria-label="Поиск рецептов"><span class="search-hint">⌘ K</span></label><button class="admin-entry" type="button" onclick="alert('Откройте опубликованную версию сайта, чтобы войти в панель управления.')"><span aria-hidden="true">⚙</span> Админ-панель</button></div>
+            <div class="category-list" role="group" aria-label="Фильтр по разделам"><button class="category-chip selected" aria-pressed="true">Все рецепты</button><button class="category-chip" aria-pressed="false">Первые блюда</button><button class="category-chip" aria-pressed="false">Выпечка</button><button class="category-chip" aria-pressed="false">Основные блюда</button><button class="category-chip" aria-pressed="false">Десерты</button><button class="category-chip" aria-pressed="false">Заготовки</button></div>
             <div class="shelf-cabinet" aria-label="Библиотека рецептов">
               <div class="cabinet-crown"><span>✧</span><span>СОБРАНИЕ СЕМЕЙНЫХ РЕЦЕПТОВ</span><span>✧</span></div>
               <div class="shelf-row"><div class="shelf-books">
@@ -41,7 +40,7 @@
                 <div class="book-wrap" data-category="Заготовки" data-search="Из погреба с любовью Домашние заготовки"><button class="book-spine" style="--book-color:#6a4858;--book-accent:#e2cb8d"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Из погреба с любовью</span><span class="book-subtitle">Домашние заготовки</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
               </div><div class="shelf-plank"><i></i><i></i><i></i></div></div>
               <div class="shelf-row"><div class="shelf-books"><div class="shelf-note" style="display:flex"><span>✦</span><small>Новые истории<br>скоро появятся здесь</small></div></div><div class="shelf-plank"><i></i><i></i><i></i></div></div>
-              <div class="cabinet-base"><span>✧</span> ДОБРО ПОЖАЛОВАТЬ К СТОЛУ <span>✧</span></div>
+              <div class="cabinet-base" aria-hidden="true"></div>
             </div>
           </section>
         </main>
@@ -52,16 +51,13 @@
         const search = document.getElementById('book-search');
         const chips = [...document.querySelectorAll('.category-chip')];
         const wraps = [...document.querySelectorAll('.book-wrap[data-category]')];
-        let category = 'Все книги';
+        let category = 'Все рецепты';
         function filterBooks() {
           const query = search.value.trim().toLocaleLowerCase('ru');
-          let count = 0;
           for (const wrap of wraps) {
-            const visible = (category === 'Все книги' || wrap.dataset.category === category) && (!query || wrap.dataset.search.toLocaleLowerCase('ru').includes(query));
+            const visible = (category === 'Все рецепты' || wrap.dataset.category === category) && (!query || wrap.dataset.search.toLocaleLowerCase('ru').includes(query));
             wrap.hidden = !visible;
-            if (visible) count++;
           }
-          document.getElementById('book-count').textContent = String(count).padStart(2, '0');
         }
         search.addEventListener('input', filterBooks);
         chips.forEach((chip) => chip.addEventListener('click', () => {
