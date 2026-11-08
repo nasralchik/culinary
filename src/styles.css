@@ -122,6 +122,30 @@
   .cabinet-base{height:31px;margin-left:-12px;margin-right:-12px;margin-bottom:-12px;font-size:7px;letter-spacing:.17em;gap:9px}
   .cabinet-base:before,.cabinet-base:after{font-size:16px}
 }
+.library-toolbar{
+  position:relative;
+  z-index:3;
+  padding:9px 11px 1px;
+  margin:0 0 10px;
+  border:1px solid #65421f;
+  background:repeating-linear-gradient(0deg,rgba(255,220,156,.06) 0 2px,transparent 3px 8px),linear-gradient(180deg,#704522,#422a19 100%);
+  box-shadow:inset 0 1px 0 #d8b36d,inset 0 0 0 3px rgba(35,22,13,.56),inset 0 0 0 5px rgba(216,172,99,.48),0 7px 14px rgba(43,28,15,.3);
+}
+.library-toolbar .library-tools{padding:0;background:none;border:0;box-shadow:none}
+.library-toolbar .category-list{margin:0;background:none;padding:10px 0 8px;scrollbar-color:#a17a42 transparent}
+.library-toolbar .category-chip{font-size:12px;padding:8px 15px}
+.shelf-row{position:relative;overflow:visible}
+.shelf-books{height:calc(100% - 6px)}
+.book-wrap{flex:0 1 150px;max-width:150px}
+.book-art{flex:0 0 48px;width:78px;height:48px;padding:2px;border:1px solid #e6c67c;border-radius:50%;overflow:hidden;background:radial-gradient(ellipse,#e5d2a2 0 42%,#a77c3d 44% 48%,#4b3422 50% 55%,transparent 58%);}
+.book-art img{display:block;width:100%;height:100%;object-fit:cover;border:1px solid rgba(37,23,13,.82);border-radius:50%;box-shadow:inset 0 0 0 2px #dfbd70;}
+@media(max-width:760px){.library-toolbar{padding:8px 9px 1px}.library-toolbar .category-chip{padding:7px 10px;font-size:10px}}
+@media(max-width:520px){
+  .library-toolbar{padding:7px 7px 0;margin-bottom:9px}
+  .library-toolbar .category-list{padding:8px 0 7px}
+  .book-art{flex-basis:29px;width:42px;height:29px;padding:1px}
+  .shelf-books{height:100%}
+}
 .library-tools{display:flex;align-items:stretch;gap:12px}
 .library-tools .search-box{flex:1;min-width:0}
 .admin-entry{flex:0 0 36px;width:36px;height:36px;display:grid;place-items:center;padding:0;border:1px solid rgba(118,85,47,.36);border-radius:50%;background:rgba(237,222,190,.42);box-shadow:inset 0 1px rgba(255,255,255,.42);color:#715a39;font-family:inherit;font-size:17px;cursor:pointer;opacity:.76;transition:opacity .2s,background .2s,border-color .2s}
@@ -289,3 +313,70 @@
 .book-spine:before{inset:9px 8px;border-width:2px;box-shadow:inset 0 0 0 2px rgba(18,13,8,.22)}
 .book-title{text-shadow:0 1px 1px rgba(26,16,8,.95),0 0 9px rgba(247,214,144,.18)}
 @media(max-width:520px){.shelf-cabinet:after{background:radial-gradient(ellipse at 9px 9px,#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),radial-gradient(ellipse at calc(100% - 9px) 9px,#e0bd79 0 2px,#52351e 3px 5px,transparent 6px),linear-gradient(90deg,#442a18 0,#c49655 3px,#714725 7px,#4c301c 10px,transparent 16px,transparent calc(100% - 16px),#4c301c calc(100% - 10px),#714725 calc(100% - 7px),#c49655 calc(100% - 3px),#442a18 100%);box-shadow:inset 0 0 0 3px rgba(235,197,123,.72),inset 0 0 0 6px rgba(49,29,15,.72)}}
+
+/* The supplied reference artwork brings in the stone kitchen around the live shelf. */
+@media(min-width:1000px){
+  .app-shell{
+    background-color:#59432e;
+    background-image:linear-gradient(90deg,transparent 0 14.6%,rgba(216,198,160,.97) 15.5% 84.5%,transparent 85.4%),url('/images/historic-library-room.jpg');
+    background-size:100% 100%,100% 100%;
+    background-position:center top;
+    background-repeat:no-repeat;
+  }
+  .paper-grain{opacity:.1;mix-blend-mode:soft-light}
+}
+.book-wrap{flex-basis:150px;max-width:150px}
+.shelf-row{height:clamp(190px,20vh,212px);padding-top:29px}
+.shelf-books{gap:clamp(10px,1.4vw,21px)}
+.shelf-row-label{
+  position:absolute;
+  z-index:3;
+  top:-13px;
+  left:50%;
+  transform:translateX(-50%);
+  min-width:min(290px,76%);
+  padding:5px 20px 6px;
+  border:1px solid #d6ad64;
+  outline:1px solid rgba(54,33,18,.7);
+  background:linear-gradient(180deg,#70451f,#b17a38 36%,#75471f 100%);
+  box-shadow:inset 0 1px 0 #f0d590,inset 0 -2px 0 #432916,0 4px 8px rgba(31,18,9,.58);
+  color:#f3d58e;
+  text-align:center;
+  text-transform:uppercase;
+  font:600 9px/1.2 'Cormorant Garamond',Georgia,serif;
+  letter-spacing:.2em;
+  white-space:nowrap;
+  text-shadow:0 1px 2px #29190d;
+}
+.shelf-row-label:before,.shelf-row-label:after{content:'✦';color:#f2d48b;font-size:10px;margin:0 11px}
+.shelf-row-label span{color:#e9c878}
+.book-spine{position:relative}
+.book-art{
+  position:relative;
+  z-index:1;
+  display:grid;
+  place-items:center;
+  flex:0 0 39px;
+  width:53px;
+  height:39px;
+  margin:1px 0;
+  border-radius:50%;
+  background:radial-gradient(ellipse,#e7d5a6 0 37%,#9c7541 39% 43%,#4b3422 45% 50%,transparent 52%);
+  font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;
+  font-size:22px;
+  line-height:1;
+  filter:drop-shadow(0 2px 2px rgba(20,12,6,.65));
+}
+@media(max-width:760px){
+  .shelf-row{height:clamp(190px,24vh,220px)}
+  .book-wrap{flex-basis:clamp(100px,16vw,145px);max-width:145px}
+}
+@media(max-width:520px){
+  .shelf-row{height:250px;min-height:250px;padding-top:35px}
+  .shelf-books{flex-wrap:wrap;align-content:flex-end;gap:5px;padding-bottom:8px}
+  .book-wrap{flex:0 1 calc(33.333% - 5px);max-width:none;height:90px}
+  .book-spine{padding:5px 4px 4px}
+  .book-art{flex-basis:24px;width:36px;height:26px;font-size:16px}
+  .shelf-row-label{top:-11px;min-width:82%;padding:4px 6px;font-size:8px;letter-spacing:.08em}
+  .shelf-row-label:before,.shelf-row-label:after{margin:0 5px}
+}
