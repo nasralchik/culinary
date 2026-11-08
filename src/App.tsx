@@ -71,7 +71,7 @@ function App() {
       <div className="paper-grain" aria-hidden="true" />
       <main id="library">
         <section className="library-section" aria-label="Коллекция рецептов">
-          <div className="library-tools"><SearchBar value={search} onChange={setSearch} /><button className="admin-entry" onClick={() => setShowAdmin(true)}><span aria-hidden="true">⚙</span> Админ-панель</button></div>
+          <div className="library-tools"><SearchBar value={search} onChange={setSearch} /><button className="admin-entry" aria-label="Админ-панель" title="Админ-панель" onClick={() => setShowAdmin(true)}><span aria-hidden="true">⚙</span></button></div>
           <CategoryFilter categories={categories} selected={category} onSelect={setCategory} />
           {filteredBooks.length > 0 ? <Bookshelf books={filteredBooks} onBookSelect={setSelectedBook} /> : <div className="empty-state"><span>⌕</span><h3>Книга не нашлась</h3><p>Попробуйте изменить запрос или выбрать другой раздел.</p></div>}
         </section>
