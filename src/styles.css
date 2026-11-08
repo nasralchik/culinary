@@ -8,3 +8,117 @@
 @media(max-width:520px){.site-header{padding:15px 16px;flex-wrap:wrap;gap:11px}.brand-mark{font-size:24px}.brand strong{font-size:20px}.brand small{font-size:16px}.main-nav{order:3;width:100%;justify-content:center;border-top:1px solid rgba(97,70,39,.16);padding-top:6px;gap:30px}.main-nav a{padding:6px 0}.intro-section{padding:42px 22px 30px;min-height:0}.intro-copy h1{font-size:clamp(43px,11vw,57px)}.intro-description{font-size:12px;line-height:1.7;margin-top:15px}.intro-copy{max-width:100%}.hero-seal{display:none}.library-section{padding:8px 13px 38px}.section-heading h2{font-size:29px}.book-count{font-size:10px}.search-box{height:44px;padding:0 11px}.search-box input{font-size:11px}.search-hint{display:none}.category-list{gap:6px;padding:11px 0 14px}.category-chip{padding:7px 10px;font-size:10px}.shelf-cabinet{padding:0 12px 11px;border-width:1px;box-shadow:0 9px 17px #3f2b1740,inset 0 0 0 3px #e9c6826b,inset 0 0 0 5px #4b2f1952}.cabinet-crown{height:25px;font-size:7px;gap:12px;letter-spacing:.19em}.shelf-row{height:auto;min-height:106px;padding:7px 3px 10px}.shelf-books{gap:5px;padding:0 3px 4px}.book-wrap{flex-basis:33.333%;height:90px}.book-spine{border-left-width:3px;padding:6px 4px 5px}.book-title{font-size:clamp(10px,3vw,14px)}.book-subtitle{font-size:6px}.book-ornament{font-size:10px}.book-ornament.bottom{font-size:8px}.book-top-rule,.book-bottom-rule{height:3px}.shelf-plank{height:11px}.shelf-plank i{top:3px}.cabinet-base{height:25px;margin-left:-12px;margin-right:-12px;margin-bottom:-11px;gap:10px;font-size:7px;letter-spacing:.18em}.shelf-caption{font-size:10px;margin-top:13px}.site-footer{padding:15px 15px 18px;font-size:9px;justify-content:center}.site-footer span:first-child{display:none}.book-dialog{padding:32px 25px}.book-dialog h2{font-size:32px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 .library-section{padding-top:clamp(24px,4vh,48px)}
+
+/* Manor-library art direction: warm stone, carved walnut, and upright books. */
+.app-shell{
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(255,244,213,.72),transparent 55%),
+    repeating-linear-gradient(0deg,transparent 0 154px,rgba(92,67,42,.095) 155px 157px,transparent 158px 311px),
+    repeating-linear-gradient(90deg,transparent 0 288px,rgba(92,67,42,.07) 289px 291px,transparent 292px 578px),
+    linear-gradient(115deg,#c8b48d 0%,#e6d5b3 46%,#c5ae83 100%);
+}
+.paper-grain{opacity:.25}
+.library-section{max-width:1220px;padding-top:clamp(24px,4vh,48px)}
+.section-heading h2{font-size:clamp(34px,4vw,48px);text-shadow:0 1px rgba(255,244,216,.55)}
+.book-count{color:#5f4930}
+.book-count strong{color:#873f35}
+.search-box{background:linear-gradient(180deg,rgba(247,236,211,.92),rgba(225,207,171,.86));border-color:#9c7c4e;box-shadow:inset 0 1px rgba(255,255,255,.6),0 2px 5px rgba(67,45,23,.12)}
+.category-chip{background:rgba(237,222,190,.78);border-color:#ab8b59;color:#59452f;box-shadow:inset 0 1px rgba(255,255,255,.55)}
+.category-chip.selected{background:linear-gradient(180deg,#49624a,#293f33);border-color:#263a2e;color:#f3dfac;box-shadow:inset 0 1px rgba(255,255,255,.18),0 2px 4px rgba(47,34,19,.25)}
+.shelf-cabinet{
+  padding:0 30px 17px;
+  border:2px solid #52351f;
+  background:
+    linear-gradient(90deg,rgba(40,24,13,.76),transparent 5%,transparent 95%,rgba(40,24,13,.76)),
+    repeating-linear-gradient(0deg,rgba(255,224,160,.035) 0 2px,transparent 3px 18px),
+    linear-gradient(100deg,#6b4528,#9b6c3d 7%,#744a2b 12%,#895b34 50%,#6f4829 88%,#a17745 94%,#604027);
+  border-radius:3px;
+  box-shadow:0 18px 32px rgba(44,29,15,.37),inset 0 0 0 4px #c39a5d,inset 0 0 0 7px #57381f,inset 0 0 0 10px rgba(225,187,119,.55);
+}
+.shelf-cabinet:before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:8px;
+  pointer-events:none;
+  border:1px solid rgba(239,204,136,.7);
+  box-shadow:inset 0 0 0 3px rgba(54,33,18,.25);
+}
+.cabinet-crown{
+  position:relative;
+  z-index:1;
+  height:46px;
+  background:linear-gradient(180deg,#59381e,#8a5b31 28%,#5b391f 100%);
+  color:#f0d18d;
+  font-size:10px;
+  letter-spacing:.32em;
+  border-bottom:3px solid #3f2918;
+  box-shadow:inset 0 1px #e2bd75,inset 0 -1px #c39451,0 4px 7px rgba(37,23,12,.4);
+}
+.cabinet-crown:before,.cabinet-crown:after{content:"❧";font-family:Georgia,serif;font-size:25px;color:#d7af66;line-height:1}
+.shelf-row{
+  height:clamp(150px,18vh,194px);
+  padding:12px 12px 17px;
+  background:linear-gradient(90deg,rgba(40,24,13,.35),rgba(246,205,130,.035) 7%,transparent 50%,rgba(246,205,130,.035) 93%,rgba(40,24,13,.35));
+}
+.shelf-books{position:relative;z-index:1;gap:clamp(10px,2vw,24px);padding:0 20px 8px}
+.book-wrap{height:100%;flex:0 1 158px;max-width:158px;min-width:0}
+.book-spine{
+  border:1px solid rgba(239,211,143,.82);
+  border-left:7px solid color-mix(in srgb,var(--book-color),black 30%);
+  border-right:4px solid rgba(29,20,13,.62);
+  border-radius:4px 5px 2px 2px;
+  padding:10px 8px 9px;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.42),transparent 13%,rgba(255,231,175,.16) 27%,transparent 42%,rgba(0,0,0,.08) 72%,rgba(0,0,0,.32)),
+    repeating-linear-gradient(0deg,transparent 0 9px,rgba(25,16,10,.06) 10px 11px),
+    var(--book-color);
+  box-shadow:inset 0 0 0 2px rgba(226,190,112,.42),inset 0 0 0 5px rgba(31,22,14,.2),3px 5px 9px rgba(34,22,12,.5);
+}
+.book-spine:before{content:"";position:absolute;inset:8px 7px;border:1px solid color-mix(in srgb,var(--book-accent),transparent 24%);pointer-events:none}
+.book-top-rule,.book-bottom-rule{width:88%;height:5px;border-top:1px solid var(--book-accent);border-bottom:1px solid var(--book-accent);opacity:.9}
+.book-ornament{font-size:20px;text-shadow:0 1px 2px rgba(20,12,6,.6)}
+.book-ornament.bottom{font-size:14px}
+.book-title{position:relative;z-index:1;max-width:100%;font-size:clamp(15px,1.65vw,21px);line-height:1.02;color:var(--book-accent);text-shadow:0 1px 2px rgba(18,12,7,.85)}
+.book-subtitle{position:relative;z-index:1;font-size:9px;color:#f1d89d;text-shadow:0 1px 2px #23160d;max-width:100%}
+.shelf-plank{
+  height:20px;
+  background:repeating-linear-gradient(0deg,rgba(255,223,162,.08) 0 2px,transparent 3px 7px),linear-gradient(180deg,#d9b576 0%,#a87943 20%,#6c4527 61%,#432b19 100%);
+  border:1px solid #4e321d;
+  box-shadow:0 7px 9px rgba(28,18,10,.48),inset 0 2px 1px #f0d49a,inset 0 -2px #3c2617;
+}
+.shelf-plank i{top:7px;width:9px;height:5px;background:#50341d;box-shadow:inset 0 1px 1px #e1b968,0 0 0 1px rgba(230,192,120,.35)}
+.cabinet-base{height:38px;margin:0 -30px -17px;background:linear-gradient(180deg,#b48851,#74502f 34%,#432b1a 100%);border-top:3px solid #dfbc79;box-shadow:inset 0 2px 3px #efcf91,0 4px 7px rgba(31,19,10,.35);font-size:9px;letter-spacing:.34em}
+.cabinet-base:before,.cabinet-base:after{content:"❧";font:22px Georgia,serif;color:#d9b66f}
+.shelf-note{color:#e4c982;text-align:center;align-items:center;justify-content:center;flex-direction:column;gap:8px}
+.shelf-note span{font-size:23px}
+.shelf-note small{font-size:11px;line-height:1.4;color:#e2c991}
+.book-dialog{border:2px solid #74502f;box-shadow:0 18px 60px rgba(24,15,8,.72),inset 0 0 0 5px rgba(177,132,70,.4)}
+@media(max-width:760px){
+  .shelf-cabinet{padding-left:20px;padding-right:20px}
+  .shelf-row{height:clamp(128px,19vh,162px);padding:9px 5px 14px}
+  .shelf-books{gap:clamp(7px,2vw,14px);padding-left:8px;padding-right:8px}
+  .book-wrap{flex-basis:clamp(105px,19vw,142px);height:100%}
+  .cabinet-base{margin-left:-20px;margin-right:-20px}
+}
+@media(max-width:520px){
+  .library-section{padding-left:13px;padding-right:13px}
+  .section-heading h2{font-size:32px}
+  .shelf-cabinet{padding-left:12px;padding-right:12px;padding-bottom:12px}
+  .cabinet-crown{height:37px;font-size:8px;letter-spacing:.18em;gap:8px}
+  .cabinet-crown:before,.cabinet-crown:after{font-size:18px}
+  .shelf-row{height:clamp(112px,16vh,138px);padding:7px 2px 12px}
+  .shelf-books{gap:5px;padding:0 3px 5px}
+  .book-wrap{flex-basis:clamp(72px,25vw,104px);height:100%}
+  .book-spine{border-left-width:4px;border-right-width:2px;padding:7px 5px 6px}
+  .book-spine:before{inset:6px 4px}
+  .book-title{font-size:clamp(11px,3vw,15px)}
+  .book-subtitle{font-size:7px}
+  .book-ornament{font-size:14px}
+  .book-ornament.bottom{font-size:10px}
+  .book-top-rule,.book-bottom-rule{height:4px}
+  .shelf-plank{height:15px}
+  .shelf-plank i{top:5px}
+  .cabinet-base{height:31px;margin-left:-12px;margin-right:-12px;margin-bottom:-12px;font-size:7px;letter-spacing:.17em;gap:9px}
+  .cabinet-base:before,.cabinet-base:after{font-size:16px}
+}
