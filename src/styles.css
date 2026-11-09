@@ -399,3 +399,23 @@
 .shelf-row-label span{color:#58391b}
 .book-art-fallback{display:grid;place-items:center;width:100%;height:100%;font:24px 'Segoe UI Emoji','Apple Color Emoji',sans-serif;line-height:1}
 @media(max-width:520px){.shelf-row-label{max-width:95%;padding:6px 7px;font-size:11px}.shelf-row-label:before,.shelf-row-label:after{margin:0 5px}}
+.shelf-row{height:clamp(202px,20vh,224px)}
+.shelf-books{padding-bottom:10px}
+.book-wrap{height:calc(100% + 12px);transform:translateY(-6px)}
+.book-wrap .book-spine{font-family:'Literata',Georgia,serif}
+.book-title{font-family:'Literata',Georgia,serif;font-size:clamp(13px,1.15vw,17px);font-weight:600;line-height:1.13;letter-spacing:.005em;color:color-mix(in srgb,var(--book-accent),white 10%);text-shadow:0 1px 2px rgba(18,10,5,.95)}
+.book-subtitle{font-family:'Literata',Georgia,serif;font-size:clamp(8px,.72vw,10px);font-weight:500;line-height:1.25;color:#f2dfb1;text-shadow:0 1px 2px rgba(20,12,5,.95)}
+.shelf-row-label{font-family:'Literata',Georgia,serif;font-size:14px;font-weight:600;letter-spacing:.02em}
+.book-spine:after{content:"";position:absolute;z-index:1;top:9px;bottom:9px;left:8px;width:8px;border-left:1px solid rgba(242,208,132,.72);border-right:1px solid rgba(35,22,13,.7);background:linear-gradient(90deg,rgba(255,222,150,.28),rgba(28,17,10,.26));pointer-events:none}
+.book-art{flex-basis:44px;width:78px;height:44px;border:0;border-radius:4px;padding:1px;background:transparent;filter:drop-shadow(0 2px 2px rgba(20,12,6,.55))}
+.book-art img{border:1px solid rgba(231,195,115,.88);border-radius:4px;box-shadow:inset 0 0 0 2px rgba(32,20,12,.3)}
+.book-art-fallback{border:1px solid #d4ae66;border-radius:50%;background:radial-gradient(ellipse,#ead8a8 0 38%,#97703e 41% 46%,#3f2a1a 49% 54%,transparent 57%)}
+@media(max-width:760px){.book-wrap{transform:translateY(-6px)}.book-title{font-size:clamp(12px,2.2vw,16px)}}
+@media(max-width:520px){
+  .shelf-row{height:250px}
+  .shelf-books{padding-bottom:8px}
+  .book-wrap{height:90px;transform:translateY(-3px)}
+  .book-title{font-size:clamp(10px,3vw,13px)}
+  .book-subtitle{font-size:7px}
+  .book-art{flex-basis:27px;width:40px;height:27px}
+}
