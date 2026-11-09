@@ -526,6 +526,7 @@
   background:linear-gradient(180deg,#f0d18d 0%,#c08d4b 18%,#81542d 61%,#4d301a 100%);
   box-shadow:0 7px 10px rgba(28,18,10,.5),inset 0 2px 1px #fff0bd,inset 0 -2px #51331d;
 }
+.shelf-plank>i{display:none}
 .shelf-plank>.shelf-row-label{
   height:calc(100% + 5px);
   padding:0 12px;
