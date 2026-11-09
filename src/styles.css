@@ -432,3 +432,20 @@
   .book-title{font-size:clamp(12px,3.3vw,15px)}
   .book-art{width:42px;height:27px;flex-basis:27px}
 }
+.book-spine{display:grid;grid-template-rows:4px 16px 2.1em 2.2em 44px 12px 4px;align-content:space-between;justify-items:center}
+.book-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:ellipsis;width:100%;min-height:2.1em;max-height:2.1em;margin:0;}
+.book-subtitle{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;text-overflow:ellipsis;width:100%;min-height:2.2em;max-height:2.2em;margin:0;}
+.book-art{width:88px;height:44px;flex:initial;align-self:center}
+.book-art img{width:100%;height:100%;object-fit:cover}
+.book-ornament{font-size:15px;line-height:1}
+.book-ornament.bottom{font-size:12px}
+@media(max-width:520px){
+  .book-spine{grid-template-rows:3px 12px 2.1em 2.1em 23px 8px 3px}
+  .book-title{min-height:2.1em;max-height:2.1em}
+  .book-subtitle{min-height:2.1em;max-height:2.1em}
+  .book-art{width:40px;height:23px}
+}
+.shelf-row-first{height:260px;padding-top:64px}
+.shelf-row-first .shelf-row-label{top:8px;max-width:88%;z-index:4}
+@media(max-width:760px){.shelf-row-first{height:260px;padding-top:58px}}
+@media(max-width:520px){.shelf-row-first{height:275px;min-height:275px;padding-top:56px}.shelf-row-first .shelf-row-label{top:8px}}
