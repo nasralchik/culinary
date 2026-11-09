@@ -419,3 +419,16 @@
   .book-subtitle{font-size:7px}
   .book-art{flex-basis:27px;width:40px;height:27px}
 }
+.shelf-row-label{top:-21px;font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:700;letter-spacing:.015em}
+.shelf-row-label:before,.shelf-row-label:after{font-size:13px;margin:0 14px}
+.book-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(16px,1.45vw,21px);font-weight:700;line-height:1.03;letter-spacing:.012em;color:#f0ce7d;text-shadow:0 1px 2px #21140b,0 0 8px rgba(241,202,118,.22)}
+.book-subtitle{font-family:'Literata',Georgia,serif;font-size:clamp(8px,.72vw,10px);font-weight:500;color:#f4e4bd}
+.book-art{width:88px;height:48px;flex-basis:48px}
+.book-art img{border-radius:3px;filter:saturate(1.08) contrast(1.04)}
+@media(max-width:760px){.book-title{font-size:clamp(14px,2.6vw,18px)}}
+@media(max-width:520px){
+  .shelf-row-label{top:-18px;font-size:14px;letter-spacing:0}
+  .shelf-row-label:before,.shelf-row-label:after{margin:0 5px;font-size:10px}
+  .book-title{font-size:clamp(12px,3.3vw,15px)}
+  .book-art{width:42px;height:27px;flex-basis:27px}
+}
