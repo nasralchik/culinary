@@ -29,7 +29,7 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
             <div className="shelf-books">
               {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
             </div>
-            <div className="shelf-plank"><i /><i /><i />{row[0] && <div className="shelf-row-label" aria-hidden="true">{row[0].category}</div>}</div>
+            <div className="shelf-plank">{row[0] && <div className="shelf-row-label" aria-hidden="true">{row[0].category}</div>}</div>
           </div>
         )
       })}
