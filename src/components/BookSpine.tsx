@@ -8,7 +8,7 @@ export function BookSpine({ book }: { book: RecipeBook }) {
   const imageByCategory = { 'Первые блюда': '/images/dish-soup.jpg', 'Выпечка': '/images/dish-pie.jpg', 'Основные блюда': '/images/dish-roast.jpg', 'Десерты': '/images/dish-cake.jpg', 'Заготовки': '/images/dish-salad.jpg' }
   const image = book.artImage ?? imageByCategory[book.category]
   return (
-    <button className="book-spine" style={{ '--book-color': book.color, '--book-accent': book.accent } as CSSProperties} aria-label={book.title}>
+    <button className="book-spine" style={{ '--book-color': book.color, '--book-accent': book.accent } as CSSProperties} aria-label={book.title} title={book.title}>
       <span className="book-top-rule" />
       <span className="book-ornament" aria-hidden="true">✳</span>
       <span className="book-title">{book.title}</span>
