@@ -9,13 +9,15 @@ export function BookSpine({ book }: { book: RecipeBook }) {
   const image = book.artImage ?? imageByCategory[book.category]
   return (
     <button className="book-spine" style={{ '--book-color': book.color, '--book-accent': book.accent } as CSSProperties} aria-label={book.title} title={book.title}>
-      <span className="book-top-rule" />
-      <span className="book-ornament" aria-hidden="true">✳</span>
-      <span className="book-title">{book.title}</span>
-      <span className="book-subtitle">{book.subtitle}</span>
-      <span className="book-art" aria-hidden="true">{image && !imageFailed ? <img src={image} alt="" loading="lazy" onError={() => setImageFailed(true)} /> : <span className="book-art-fallback">{book.art ?? artByCategory[book.category]}</span>}</span>
-      <span className="book-ornament bottom" aria-hidden="true">✦</span>
-      <span className="book-bottom-rule" />
+      <span className="book-cover-layout">
+        <span className="book-top-rule" />
+        <span className="book-ornament" aria-hidden="true">✳</span>
+        <span className="book-title" title={book.title}>{book.title}</span>
+        <span className="book-subtitle" title={book.subtitle}>{book.subtitle}</span>
+        <span className="book-art" aria-hidden="true">{image && !imageFailed ? <img src={image} alt="" loading="lazy" onError={() => setImageFailed(true)} /> : <span className="book-art-fallback">{book.art ?? artByCategory[book.category]}</span>}</span>
+        <span className="book-ornament bottom" aria-hidden="true">✦</span>
+        <span className="book-bottom-rule" />
+      </span>
     </button>
   )
 }
