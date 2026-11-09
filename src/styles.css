@@ -317,7 +317,7 @@
 /* The supplied reference artwork brings in the stone kitchen around the live shelf. */
 @media(min-width:1000px){
   .app-shell{
-    background-color:#59432e;
+    background-color:#d8c6a0;
     background-image:linear-gradient(90deg,transparent 0 14.6%,rgba(216,198,160,.97) 15.5% 84.5%,transparent 85.4%),url('/images/historic-library-room.jpg');
     background-size:100% 100%,100% 100%;
     background-position:center top;
@@ -380,3 +380,22 @@
   .shelf-row-label{top:-11px;min-width:82%;padding:4px 6px;font-size:8px;letter-spacing:.08em}
   .shelf-row-label:before,.shelf-row-label:after{margin:0 5px}
 }
+.shelf-row-label{
+  min-width:0;
+  max-width:88%;
+  padding:8px 22px 9px;
+  border:2px solid #e0bb71;
+  outline:1px solid #3b2617;
+  background:linear-gradient(180deg,#f0d69b,#d1a85e 48%,#b4823e);
+  box-shadow:inset 0 1px 0 #fff0c4,inset 0 -2px 0 #8b5e2c,0 4px 8px rgba(31,18,9,.62);
+  color:#342316;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.035em;
+  text-transform:none;
+  text-shadow:0 1px rgba(255,244,207,.65);
+}
+.shelf-row-label:before,.shelf-row-label:after{color:#55371c;font-size:12px;margin:0 13px}
+.shelf-row-label span{color:#58391b}
+.book-art-fallback{display:grid;place-items:center;width:100%;height:100%;font:24px 'Segoe UI Emoji','Apple Color Emoji',sans-serif;line-height:1}
+@media(max-width:520px){.shelf-row-label{max-width:95%;padding:6px 7px;font-size:11px}.shelf-row-label:before,.shelf-row-label:after{margin:0 5px}}
