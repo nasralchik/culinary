@@ -468,3 +468,46 @@
   .book-cover-layout>.book-art{width:40px;height:21px}
   .shelf-row-first{height:275px;min-height:275px;padding-top:56px}
 }
+.cabinet-crown{z-index:3}
+.shelf-row{z-index:3}
+.shelf-cabinet>.shelf-row-first,.shelf-cabinet>.shelf-row:nth-of-type(2){height:clamp(202px,20vh,224px);min-height:0;padding-top:29px}
+.shelf-row-label,
+.cabinet-crown>.shelf-row-label,
+.shelf-plank>.shelf-row-label{
+  position:absolute;
+  top:50%;
+  left:50%;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform:translate(-50%,-50%);
+  width:max-content;
+  min-width:0;
+  max-width:min(280px,calc(100vw - 48px));
+  height:29px;
+  padding:3px 16px;
+  border:1px solid #e7c578;
+  outline:1px solid rgba(49,29,14,.78);
+  background:linear-gradient(180deg,#f0d69b,#d1a85e 48%,#b4823e);
+  box-shadow:inset 0 1px 0 #fff0c4,inset 0 -2px 0 #8b5e2c,0 3px 6px rgba(31,18,9,.58);
+  color:#342316;
+  font:700 15px/1 'Cormorant Garamond',Georgia,serif;
+  letter-spacing:.01em;
+  text-align:center;
+  text-transform:none;
+  text-shadow:0 1px rgba(255,244,207,.65);
+  white-space:nowrap;
+}
+.cabinet-crown>.shelf-row-label{height:30px}
+.shelf-row-label:before,.shelf-row-label:after{content:'✦';color:#58391b;font-size:10px;margin:0 9px}
+.shelf-row-label span{color:#58391b}
+.shelf-row-first{height:clamp(202px,20vh,224px);min-height:0;padding-top:29px}
+@media(max-width:760px){.shelf-row-first{height:clamp(190px,24vh,220px);padding-top:29px}}
+@media(max-width:520px){
+  .shelf-row-first{height:250px;min-height:250px;padding-top:35px}
+  .shelf-row-label,.cabinet-crown>.shelf-row-label,.shelf-plank>.shelf-row-label{height:25px;padding:2px 8px;font-size:12px;max-width:calc(100vw - 36px)}
+  .shelf-row-label:before,.shelf-row-label:after{font-size:8px;margin:0 5px}
+}
+@media(max-width:760px){.shelf-cabinet>.shelf-row-first,.shelf-cabinet>.shelf-row:nth-of-type(2){height:clamp(190px,24vh,220px);padding-top:29px}}
+@media(max-width:520px){.shelf-cabinet>.shelf-row-first,.shelf-cabinet>.shelf-row:nth-of-type(2){height:250px;min-height:250px;padding-top:35px}}
