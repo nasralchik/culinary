@@ -24,7 +24,7 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
       <div className="cabinet-crown" aria-hidden="true" />
       {rows.map((row, index) => (
-        <div className="shelf-row" key={index}>
+        <div className={index === 0 ? 'shelf-row shelf-row-first' : 'shelf-row'} key={index}>
           {row.length > 0 && <div className="shelf-row-label" aria-hidden="true"><span>{['I', 'II', 'III', 'IV', 'V'][index]}.</span> {row[0].category}</div>}
           <div className="shelf-books">
             {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
