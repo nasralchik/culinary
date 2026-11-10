@@ -58,7 +58,7 @@ function makeSlug(title: string) {
   return latin.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-export function AdminPanel({ onClose }: { onClose: () => void }) {
+export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void; onRecipesChanged?: () => void }) {
   const [user, setUser] = useState<User | null>(null)
   const [checking, setChecking] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -254,6 +254,7 @@ export function AdminPanel({ onClose }: { onClose: () => void }) {
     setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
     setSteps([''])
     setNotice(payload.is_published ? 'Рецепт опубликован.' : 'Черновик сохранён.')
+    onRecipesChanged?.()
     setBusy(false)
   }
 
