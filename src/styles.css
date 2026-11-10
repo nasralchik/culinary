@@ -447,6 +447,7 @@ main { position: relative; z-index: 1; }
 .admin-login label, .recipe-form label { display: grid; gap: 6px; color: #5d4a31; font: 600 14px/1.4 var(--font-ui); }
 .admin-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 2px; color: #705b3d; font: 600 14px var(--font-ui); }
 .admin-toolbar > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-toolbar-actions .is-selected { border-color: #293c30; background: linear-gradient(#49634b, #2b4033); color: #f4dfaa; }
 .admin-secondary, .admin-primary, .admin-add-row { padding: 9px 13px; border: 1px solid #80623a; background: linear-gradient(#f1e5c9, #dfc99e); color: #4d3b26; font: 600 13px var(--font-ui); cursor: pointer; }
 .admin-secondary:hover, .admin-add-row:hover { background: #f5e9cb; }
 .admin-primary { padding: 10px 16px; border-color: #293c30; background: linear-gradient(#49634b, #2b4033); color: #f4dfaa; }
@@ -473,6 +474,8 @@ main { position: relative; z-index: 1; }
 .admin-add-row { padding: 7px 10px; justify-self: start; }
 .admin-publish { display: flex !important; align-items: center; gap: 8px !important; color: #58452e !important; }
 .admin-notice, .admin-muted { margin: 0; color: #736044; font: 13px/1.5 var(--font-ui); }
+.category-form > .admin-muted { margin-top: -5px; }
+.category-form-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 @media (max-width: 1050px) {
   .library-section { width: min(100% - 40px, 950px); }
