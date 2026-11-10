@@ -9,26 +9,12 @@ interface BookshelfProps {
 
 export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
   const displayBooks = [...books].sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category))
-  const rowCount = displayBooks.length ? 5 : 0
   const rows: RecipeBook[][] = []
-  let offset = 0
-  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-    const rowsLeft = rowCount - rowIndex
-    const booksLeft = displayBooks.length - offset
-    const size = displayBooks.length <= 5 ? (rowIndex === 0 ? booksLeft : 0) : Math.ceil(booksLeft / rowsLeft)
-    const row = displayBooks.slice(offset, offset + size)
-    offset += size
-    rows.push(row)
+  for (let offset = 0; offset < displayBooks.length; offset += 5) {
+    rows.push(displayBooks.slice(offset, offset + 5))
   }
-  const firstBook = rows.find((row) => row.length > 0)?.[0]
-  let lastRowIndex = -1
-  for (let index = rows.length - 1; index >= 0; index--) {
-    if (rows[index].length > 0) {
-      lastRowIndex = index
-      break
-    }
-  }
-  const lastBook = lastRowIndex > 0 ? rows[lastRowIndex][0] : undefined
+  const firstBook = rows[0]?.[0]
+  const lastBook = rows[rows.length - 1]?.[0]
 
   return (
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
@@ -36,17 +22,13 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
         {firstBook && <div className="shelf-row-label">{firstBook.category}</div>}
       </div>
       {rows.map((row, index) => {
-        const isLastRow = index === rows.length - 1
+        const nextRow = rows[index + 1]
         return (
-          <div className={index === 0 ? 'shelf-row shelf-row-first' : 'shelf-row'} key={index}>
+          <div className={`shelf-row${nextRow ? '' : ' shelf-row-last'}`} key={index}>
             <div className="shelf-books">
               {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
             </div>
-            {!isLastRow && (
-              <div className="shelf-plank">
-                {index > 0 && row[0] && <div className="shelf-row-label" aria-hidden="true">{row[0].category}</div>}
-              </div>
-            )}
+            {nextRow && <div className="shelf-plank"><div className="shelf-row-label" aria-hidden="true">{nextRow[0].category}</div></div>}
           </div>
         )
       })}
