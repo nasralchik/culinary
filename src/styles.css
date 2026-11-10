@@ -42,7 +42,7 @@ main { position: relative; z-index: 1; }
 
 /* Search and category controls */
 .library-section {
-  width: min(1260px, calc(100% - 56px));
+  width: min(1120px, calc(100% - 56px));
   margin: 0 auto;
   padding: 34px 0 54px;
 }
