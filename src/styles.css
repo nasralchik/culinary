@@ -135,7 +135,8 @@ main { position: relative; z-index: 1; }
   padding: 0 var(--cabinet-inset);
   border: 2px solid #51351f;
   background:
-    linear-gradient(90deg, rgba(38,22,12,.62), transparent 5%, transparent 95%, rgba(38,22,12,.62)),
+    linear-gradient(90deg, rgba(35,20,11,.7) 0 5px, rgba(235,198,125,.72) 5px 7px, rgba(97,59,31,.8) 7px 11px, rgba(231,190,111,.32) 11px 13px, transparent 13px 17px, rgba(43,27,15,.58) 17px 19px, transparent 19px calc(100% - 19px), rgba(43,27,15,.58) calc(100% - 19px) calc(100% - 17px), transparent calc(100% - 17px) calc(100% - 13px), rgba(231,190,111,.32) calc(100% - 13px) calc(100% - 11px), rgba(97,59,31,.8) calc(100% - 11px) calc(100% - 7px), rgba(235,198,125,.72) calc(100% - 7px) calc(100% - 5px), rgba(35,20,11,.7) calc(100% - 5px) 100%),
+    linear-gradient(90deg, rgba(38,22,12,.48), transparent 6%, transparent 94%, rgba(38,22,12,.48)),
     repeating-linear-gradient(0deg, rgba(245,202,126,.035) 0 1px, transparent 2px 13px),
     linear-gradient(100deg, #694424, #9a6939 7%, #70472a 14%, #815432 50%, #70472a 86%, #9a6939 94%, #624022);
   box-shadow: 0 18px 34px rgba(47,29,14,.42), inset 0 0 0 4px #c89e5d, inset 0 0 0 8px #50331e;
@@ -193,7 +194,7 @@ main { position: relative; z-index: 1; }
   width: calc(100% - 22px);
   height: 100%;
   color: #e7c47c;
-  filter: drop-shadow(0 1px 1px rgba(35,20,10,.95)) drop-shadow(0 -1px .5px rgba(255,229,166,.72));
+  shape-rendering: geometricPrecision;
 }
 .shelf-row {
   position: relative;
@@ -270,15 +271,30 @@ main { position: relative; z-index: 1; }
 .cabinet-base {
   position: relative;
   z-index: 5;
-  height: 23px;
+  height: 34px;
   margin: 0 calc(0px - var(--cabinet-inset) - 2px);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 2px solid #f0d69a;
-  background: linear-gradient(180deg, #d7b36e, #875c32 45%, #50331e);
-  box-shadow: inset 0 1px 0 #fff0bd;
+  overflow: hidden;
+  border-top: 3px solid #f4d997;
+  border-bottom: 5px solid #3e2818;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,225,168,.045) 0 1px, transparent 1px 8px),
+    linear-gradient(90deg, rgba(38,22,12,.55), rgba(255,221,159,.12) 2%, transparent 12%, transparent 88%, rgba(255,221,159,.12) 98%, rgba(38,22,12,.55)),
+    linear-gradient(180deg, #f0d18e 0 3px, #744923 4px 8px, #b17c3f 9px 13px, #81542f 14px 22px, #bf8c4b 23px 27px, #6d4525 28px 100%);
+  box-shadow: inset 0 1px 0 #fff0bd, inset 0 -2px 0 rgba(232,190,113,.76), 0 5px 9px rgba(28,18,10,.38);
 }
+.base-carving {
+  position: absolute;
+  inset: 0 8px;
+  width: calc(100% - 16px);
+  height: 100%;
+  color: rgba(239,205,132,.82);
+  shape-rendering: geometricPrecision;
+  pointer-events: none;
+}
+.cabinet-base > .shelf-row-label { position: relative; z-index: 1; }
 .empty-state {
   padding: 50px 14px;
   border: 1px dashed #a88d5e;
