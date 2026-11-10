@@ -192,6 +192,32 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setBusy(false)
   }
 
+  async function deleteRecipe(recipe: RecipeRow) {
+    if (!supabase || busy) return
+    const confirmed = window.confirm(`Удалить рецепт «${recipe.title}»? Его ингредиенты и шаги приготовления также будут удалены.`)
+    if (!confirmed) return
+
+    setBusy(true)
+    setError('')
+    setNotice('Удаляем рецепт…')
+    const { error: deleteError } = await supabase.from('recipes').delete().eq('id', recipe.id)
+    if (deleteError) {
+      setError(`Рецепт не удалось удалить: ${deleteError.message}`)
+      setBusy(false)
+      return
+    }
+
+    setRecipes((current) => current.filter((item) => item.id !== recipe.id))
+    if (draft.id === recipe.id) {
+      setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
+      setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
+      setSteps([''])
+    }
+    setNotice('Рецепт удалён.')
+    onRecipesChanged?.()
+    setBusy(false)
+  }
+
   function resetDraft() {
     setAdminView('recipes')
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
@@ -384,7 +410,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         {supabase && !checking && isAdmin && <>
           <div className="admin-toolbar"><span>Управление библиотекой</span><div className="admin-toolbar-actions"><button className={`admin-secondary${adminView === 'recipes' ? ' is-selected' : ''}`} onClick={() => setAdminView('recipes')}>Рецепты</button><button className={`admin-secondary${adminView === 'categories' ? ' is-selected' : ''}`} onClick={() => setAdminView('categories')}>Категории</button>{adminView === 'recipes' && <button className="admin-secondary" onClick={resetDraft}>Новый рецепт</button>}<button className="admin-secondary" onClick={signOut}>Выйти</button></div></div>
           {adminView === 'recipes' ? <div className="admin-content">
-            <aside className="admin-recipe-list"><h3>Рецепты ({recipes.length})</h3>{recipes.length === 0 && <p className="admin-muted">Пока рецептов нет.</p>}{recipes.map((recipe) => <div className="admin-recipe-row" key={recipe.id}><button onClick={() => void editRecipe(recipe)} disabled={busy}><strong>{recipe.title}</strong><small>{recipe.is_published ? 'Опубликован' : 'Черновик'}</small></button></div>)}</aside>
+            <aside className="admin-recipe-list"><h3>Рецепты ({recipes.length})</h3>{recipes.length === 0 && <p className="admin-muted">Пока рецептов нет.</p>}{recipes.map((recipe) => <div className="admin-recipe-row" key={recipe.id}><button onClick={() => void editRecipe(recipe)} disabled={busy}><strong>{recipe.title}</strong><small>{recipe.is_published ? 'Опубликован' : 'Черновик'}</small></button><button type="button" className="admin-delete admin-category-delete" aria-label={`Удалить рецепт ${recipe.title}`} title="Удалить рецепт" onClick={() => void deleteRecipe(recipe)} disabled={busy}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg></button></div>)}</aside>
             <form className="recipe-form" onSubmit={saveRecipe}>
               <h3>{draft.id ? 'Редактировать рецепт' : 'Новый рецепт'}</h3>
               <label>Название<input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} required /></label>
