@@ -458,6 +458,10 @@ main { position: relative; z-index: 1; }
 .admin-recipe-row { display: flex; align-items: stretch; border-bottom: 1px solid rgba(117,84,45,.22); }
 .admin-recipe-row > button:first-child { flex: 1; min-width: 0; padding: 10px 8px; border: 0; background: transparent; color: #493923; text-align: left; cursor: pointer; }
 .admin-recipe-row > button:first-child:hover { background: rgba(255,247,225,.5); }
+.admin-category-delete { flex: 0 0 36px; align-self: stretch; display: grid; place-items: center; padding: 0; }
+.admin-category-delete svg { width: 16px; height: 16px; }
+.admin-category-delete:hover { background: rgba(154,73,57,.1); }
+.admin-category-delete:disabled { opacity: .5; cursor: wait; }
 .admin-recipe-row strong, .admin-recipe-row small { display: block; }
 .admin-recipe-row strong { font: 700 14px/1.4 var(--font-ui); }
 .admin-recipe-row small { margin-top: 3px; color: #8b6b3d; font: 12px/1.4 var(--font-ui); }
