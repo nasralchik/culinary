@@ -17,10 +17,10 @@ function formatIngredientAmount(ingredient: RecipeIngredient, multiplier = 1) {
   const parts: string[] = []
 
   if (ingredient.quantity != null) {
-    const quantity = ingredient.quantity * multiplier
+    const quantity = Math.floor((ingredient.quantity * multiplier + 1e-9) * 100) / 100
     parts.push(unit
-      ? `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 3 })} ${unit}`
-      : `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 3 })} · единица не указана`)
+      ? `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 2 })} ${unit}`
+      : `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 2 })} · единица не указана`)
   } else if (unit) {
     parts.push(unit)
   }
@@ -39,6 +39,9 @@ function App() {
   const [steps, setSteps] = useState<RecipeStep[]>([])
   const [scaleIngredientId, setScaleIngredientId] = useState('')
   const [scaleTarget, setScaleTarget] = useState('')
+  const [showScaler, setShowScaler] = useState(false)
+  const [pdfError, setPdfError] = useState('')
+  const [creatingPdf, setCreatingPdf] = useState(false)
   const [loadingLibrary, setLoadingLibrary] = useState(true)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [libraryError, setLibraryError] = useState('')
@@ -67,6 +70,8 @@ function App() {
     setSteps([])
     setScaleIngredientId('')
     setScaleTarget('')
+    setShowScaler(false)
+    setPdfError('')
     setRecipeError('')
     setLoadingDetails(true)
     getRecipeDetails(selectedRecipeId)
@@ -117,6 +122,29 @@ function App() {
     setRecipeError('')
     setScaleIngredientId('')
     setScaleTarget('')
+    setShowScaler(false)
+    setPdfError('')
+  }
+
+  const downloadRecipePdf = async () => {
+    if (!selectedRecipe || creatingPdf) return
+    setCreatingPdf(true)
+    setPdfError('')
+    try {
+      const { downloadRecipePdfFile } = await import('./utils/recipePdf')
+      await downloadRecipePdfFile({
+        recipe: selectedRecipe,
+        ingredients: ingredients.map((ingredient) => ({
+          name: ingredient.name,
+          amount: formatIngredientAmount(ingredient, scaleFactor),
+        })),
+        steps: steps.map((step) => step.instruction),
+      })
+    } catch {
+      setPdfError('PDF не удалось создать. Попробуйте ещё раз.')
+    } finally {
+      setCreatingPdf(false)
+    }
   }
 
   return (
@@ -137,18 +165,25 @@ function App() {
       {selectedRecipe && <div className="dialog-backdrop" role="presentation" onClick={closeRecipe}>
         <section className="book-dialog recipe-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}>
           <button className="dialog-close" onClick={closeRecipe} aria-label="Закрыть">×</button>
-          <button className="recipe-print-button" type="button" onClick={() => window.print()} title="Откроется окно печати, где можно выбрать «Сохранить в PDF»">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7zM17 11h.01"/></svg>
-            Сохранить в PDF
-          </button>
-          <p className="eyebrow small">{selectedRecipe.category}</p>
+          <div className="recipe-dialog-topline">
+            <p className="eyebrow small">{selectedRecipe.category}</p>
+            <div className="recipe-dialog-actions">
+              <button className="recipe-print-button" type="button" onClick={() => void downloadRecipePdf()} disabled={creatingPdf || loadingDetails}>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v4h14v-4"/></svg>
+                {creatingPdf ? 'Создаём PDF…' : 'Сохранить в PDF'}
+              </button>
+              {scalableIngredients.length > 0 && <button className="recipe-scaler-toggle" type="button" aria-expanded={showScaler} aria-controls="recipe-scaler" onClick={() => setShowScaler((visible) => !visible)}>
+                {showScaler ? 'Скрыть пересчёт' : 'Изменить количество'}
+              </button>}
+            </div>
+          </div>
           <h2 id="dialog-title">{selectedRecipe.title}</h2>
           {selectedRecipe.summary && <p className="recipe-summary">{selectedRecipe.summary}</p>}
           {selectedRecipe.image_url && <img className="recipe-image" src={selectedRecipe.image_url} alt={selectedRecipe.title} />}
           {selectedRecipe.description && <p className="recipe-description">{selectedRecipe.description}</p>}
           {loadingDetails ? <p className="recipe-empty">Загружаем рецепт…</p> : <>
             {ingredients.length > 0 && <div className="recipe-detail-section"><h3>Ингредиенты</h3>
-              {scalableIngredients.length > 0 && selectedScaleIngredient && <div className="recipe-scaler">
+              {showScaler && scalableIngredients.length > 0 && selectedScaleIngredient && <div className="recipe-scaler" id="recipe-scaler">
                 <div className="recipe-scaler-heading"><strong>Изменить количество</strong><span>Остальные ингредиенты пересчитаются пропорционально.</span></div>
                 <div className="recipe-scaler-controls">
                   <label>Пересчитать по продукту<select value={selectedScaleIngredient.id} onChange={(event) => {
@@ -168,6 +203,7 @@ function App() {
             })}</ul></div>}
             {steps.length > 0 && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
           </>}
+          {pdfError && <p className="recipe-pdf-error" role="alert">{pdfError}</p>}
           {recipeError && <p className="admin-error" role="alert">{recipeError}</p>}
           {selectedRecipe.youtube_url && <a className="recipe-video-link" href={selectedRecipe.youtube_url} target="_blank" rel="noreferrer">Смотреть на YouTube ↗</a>}
         </section>

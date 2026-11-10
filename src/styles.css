@@ -378,12 +378,14 @@ main { position: relative; z-index: 1; }
 .recipe-dialog { text-align: left; }
 .recipe-dialog h2 { text-align: center; margin: 16px 0 14px; }
 .recipe-dialog > h2 + p { margin-top: 20px; }
-.recipe-print-button {
-  position: absolute;
-  top: 12px;
-  right: 48px;
+.recipe-dialog-topline { min-height: 38px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.recipe-dialog-topline .eyebrow { margin: 8px 0 0; }
+.recipe-dialog-actions { width: min(205px, 48%); margin-right: 34px; display: grid; gap: 6px; }
+.recipe-print-button, .recipe-scaler-toggle {
+  width: 100%;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   min-height: 34px;
   padding: 6px 10px;
@@ -393,8 +395,11 @@ main { position: relative; z-index: 1; }
   font: 600 13px/1.2 var(--font-ui);
   cursor: pointer;
 }
-.recipe-print-button:hover { filter: brightness(1.05); }
+.recipe-print-button:hover:not(:disabled), .recipe-scaler-toggle:hover { filter: brightness(1.05); }
+.recipe-print-button:disabled { opacity: .72; cursor: wait; }
 .recipe-print-button svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.recipe-scaler-toggle { border-color: #5d735b; background: linear-gradient(#e8e2c9, #d3d0af); color: #304338; }
+.recipe-pdf-error { margin: 10px 0; color: #8b3d31; font: 13px/1.5 var(--font-ui); }
 .recipe-image { display: block; width: 100%; max-height: 320px; margin: 18px auto; border: 4px solid #b79258; object-fit: cover; }
 .recipe-dialog .recipe-summary { max-width: 520px; margin: 0 auto 24px; color: #725c3c; font: italic 19px/1.55 var(--font-serif); text-align: center; }
 .recipe-description { color: #4d4030; font: 15px/1.75 var(--font-ui); white-space: pre-line; }
@@ -519,7 +524,10 @@ main { position: relative; z-index: 1; }
   .cabinet-base { margin-right: -12px; margin-left: -12px; }
   .book-dialog { padding: 30px 20px; }
   .book-dialog h2 { font-size: 29px; }
-  .recipe-print-button { top: 8px; right: 43px; min-height: 32px; padding: 5px 7px; font-size: 11px; }
+  .recipe-dialog-topline { gap: 8px; }
+  .recipe-dialog-topline .eyebrow { max-width: 38%; overflow-wrap: anywhere; }
+  .recipe-dialog-actions { width: min(170px, 54%); margin-right: 30px; }
+  .recipe-print-button, .recipe-scaler-toggle { min-height: 32px; padding: 5px 7px; font-size: 11px; }
   .recipe-print-button svg { width: 15px; height: 15px; }
   .recipe-dialog .recipe-summary { font-size: 17px; }
   .recipe-scaler { padding: 11px; }
@@ -533,34 +541,6 @@ main { position: relative; z-index: 1; }
   .admin-field-grid { gap: 6px; }
   .ingredient-row { grid-template-columns: minmax(80px, 1.4fr) minmax(58px, .7fr) minmax(45px, .5fr) 26px; }
   .ingredient-row input[aria-label='Примечание к ингредиенту'] { display: none; }
-}
-
-@page { margin: 18mm; }
-@media print {
-  html, body, #root { min-width: 0 !important; background: #fff !important; }
-  .app-shell { min-height: 0 !important; overflow: visible !important; background: #fff !important; }
-  body * { visibility: hidden !important; }
-  .dialog-backdrop { position: static !important; display: block !important; overflow: visible !important; padding: 0 !important; background: transparent !important; }
-  .recipe-dialog, .recipe-dialog * { visibility: visible !important; }
-  .recipe-dialog {
-    position: static !important;
-    width: 100% !important;
-    max-width: none !important;
-    max-height: none !important;
-    overflow: visible !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: #fff !important;
-    box-shadow: none !important;
-    color: #222 !important;
-  }
-  .recipe-dialog .dialog-close, .recipe-print-button { display: none !important; }
-  .recipe-dialog h2, .recipe-detail-section h3 { color: #222 !important; }
-  .recipe-dialog .recipe-summary, .recipe-description, .recipe-detail-section ul, .recipe-detail-section ol { color: #333 !important; }
-  .recipe-scaler { display: none !important; }
-  .recipe-detail-section ul li { break-inside: avoid; }
-  .recipe-image { max-height: 90mm; object-fit: contain; }
 }
 
 @media (prefers-reduced-motion: reduce) {
