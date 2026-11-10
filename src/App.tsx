@@ -12,12 +12,16 @@ function isValidIngredientUnit(unit: string) {
   return value.length > 0 && !/^\d+(?:[.,]\d+)?$/.test(value)
 }
 
+function roundDownToTwo(value: number) {
+  return Math.floor((value + 1e-9) * 100) / 100
+}
+
 function formatIngredientAmount(ingredient: RecipeIngredient, multiplier = 1) {
   const unit = isValidIngredientUnit(ingredient.unit) ? ingredient.unit.trim() : ''
   const parts: string[] = []
 
   if (ingredient.quantity != null) {
-    const quantity = Math.floor((ingredient.quantity * multiplier + 1e-9) * 100) / 100
+    const quantity = roundDownToTwo(ingredient.quantity * multiplier)
     parts.push(unit
       ? `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 2 })} ${unit}`
       : `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 2 })} · единица не указана`)
@@ -39,6 +43,7 @@ function App() {
   const [steps, setSteps] = useState<RecipeStep[]>([])
   const [scaleIngredientId, setScaleIngredientId] = useState('')
   const [scaleTarget, setScaleTarget] = useState('')
+  const [scaleAdjusted, setScaleAdjusted] = useState(false)
   const [showScaler, setShowScaler] = useState(false)
   const [pdfError, setPdfError] = useState('')
   const [creatingPdf, setCreatingPdf] = useState(false)
@@ -70,6 +75,7 @@ function App() {
     setSteps([])
     setScaleIngredientId('')
     setScaleTarget('')
+    setScaleAdjusted(false)
     setShowScaler(false)
     setPdfError('')
     setRecipeError('')
@@ -79,9 +85,10 @@ function App() {
         if (active) {
           setIngredients(details.ingredients)
           setSteps(details.steps)
-          const firstScalable = details.ingredients.find((ingredient) => ingredient.quantity != null && ingredient.quantity > 0)
+          const firstScalable = details.ingredients.find((ingredient) => ingredient.quantity != null && ingredient.quantity >= 0.01)
           setScaleIngredientId(firstScalable?.id ?? '')
-          setScaleTarget(firstScalable?.quantity == null ? '' : String(firstScalable.quantity))
+          setScaleTarget(firstScalable?.quantity == null ? '' : String(roundDownToTwo(firstScalable.quantity)))
+          setScaleAdjusted(false)
         }
       })
       .catch(() => { if (active) setRecipeError('Состав и приготовление рецепта не удалось загрузить.') })
@@ -111,10 +118,10 @@ function App() {
   }), [filteredRecipes, recipes])
 
   const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) ?? null
-  const scalableIngredients = ingredients.filter((ingredient) => ingredient.quantity != null && ingredient.quantity > 0)
+  const scalableIngredients = ingredients.filter((ingredient) => ingredient.quantity != null && ingredient.quantity >= 0.01)
   const selectedScaleIngredient = scalableIngredients.find((ingredient) => ingredient.id === scaleIngredientId) ?? scalableIngredients[0]
   const requestedScaleQuantity = Number(scaleTarget)
-  const scaleFactor = selectedScaleIngredient && scaleTarget.trim() && Number.isFinite(requestedScaleQuantity) && requestedScaleQuantity > 0
+  const scaleFactor = scaleAdjusted && selectedScaleIngredient && scaleTarget.trim() && Number.isFinite(requestedScaleQuantity) && requestedScaleQuantity > 0
     ? requestedScaleQuantity / (selectedScaleIngredient.quantity ?? 1)
     : 1
   const closeRecipe = () => {
@@ -122,6 +129,7 @@ function App() {
     setRecipeError('')
     setScaleIngredientId('')
     setScaleTarget('')
+    setScaleAdjusted(false)
     setShowScaler(false)
     setPdfError('')
   }
@@ -190,11 +198,15 @@ function App() {
                     const nextIngredient = scalableIngredients.find((ingredient) => ingredient.id === event.target.value)
                     if (nextIngredient) {
                       setScaleIngredientId(nextIngredient.id)
-                      setScaleTarget(String(nextIngredient.quantity))
+                      setScaleTarget(String(roundDownToTwo(nextIngredient.quantity ?? 0)))
+                      setScaleAdjusted(false)
                     }
                   }}>{scalableIngredients.map((ingredient) => <option key={ingredient.id} value={ingredient.id}>{ingredient.name}</option>)}</select></label>
-                  <label>Новое количество<div className="recipe-scaler-amount"><input type="number" min="0.001" step="any" aria-label={`Новое количество ингредиента: ${selectedScaleIngredient.name}`} value={scaleTarget} onChange={(event) => setScaleTarget(event.target.value)} /><span>{isValidIngredientUnit(selectedScaleIngredient.unit) ? selectedScaleIngredient.unit : 'ед.'}</span></div></label>
-                  <button type="button" className="recipe-scaler-reset" onClick={() => setScaleTarget(String(selectedScaleIngredient.quantity))}>Исходное количество</button>
+                  <label>Новое количество<div className="recipe-scaler-amount"><input type="number" min="0.01" step="0.01" aria-label={`Новое количество ингредиента: ${selectedScaleIngredient.name}`} value={scaleTarget} onChange={(event) => { setScaleTarget(event.target.value); setScaleAdjusted(true) }} onBlur={(event) => {
+                    const value = Number(event.currentTarget.value)
+                    if (Number.isFinite(value) && value > 0) setScaleTarget(String(Math.max(0.01, roundDownToTwo(value))))
+                  }} /><span>{isValidIngredientUnit(selectedScaleIngredient.unit) ? selectedScaleIngredient.unit : 'ед.'}</span></div></label>
+                  <button type="button" className="recipe-scaler-reset" onClick={() => { setScaleTarget(String(roundDownToTwo(selectedScaleIngredient.quantity ?? 0))); setScaleAdjusted(false) }}>Исходное количество</button>
                 </div>
               </div>}
               <ul>{ingredients.map((ingredient) => {
