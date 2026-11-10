@@ -40,8 +40,8 @@ export async function getPublishedRecipeCount(): Promise<number | null> {
   return count ?? 0
 }
 
-export async function getPublishedRecipes(): Promise<PublicRecipe[]> {
-  if (!supabase) return []
+export async function getPublishedLibrary(): Promise<{ categories: string[]; recipes: PublicRecipe[] }> {
+  if (!supabase) return { categories: [], recipes: [] }
 
   const [categoryResult, recipeResult] = await Promise.all([
     supabase.from('recipe_categories').select('id,title').order('sort_order'),
@@ -53,11 +53,13 @@ export async function getPublishedRecipes(): Promise<PublicRecipe[]> {
   if (categoryResult.error) throw categoryResult.error
   if (recipeResult.error) throw recipeResult.error
 
-  const categoryById = new Map((categoryResult.data ?? []).map((category) => [category.id, category.title as RecipeCategory]))
-  return (recipeResult.data ?? []).flatMap((recipe) => {
+  const categoryRows = categoryResult.data ?? []
+  const categoryById = new Map(categoryRows.map((category) => [category.id, category.title as RecipeCategory]))
+  const recipes = (recipeResult.data ?? []).flatMap((recipe) => {
     const category = recipe.category_id ? categoryById.get(recipe.category_id) : undefined
     return category ? [{ ...recipe, category } as PublicRecipe] : []
   })
+  return { categories: categoryRows.map((category) => category.title as string), recipes }
 }
 
 export async function getRecipeDetails(recipeId: string): Promise<{ ingredients: RecipeIngredient[]; steps: RecipeStep[] }> {

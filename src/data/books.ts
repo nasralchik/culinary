@@ -1,4 +1,4 @@
-export const categories = ['Все рецепты', 'Первые блюда', 'Выпечка', 'Основные блюда', 'Десерты', 'Заготовки'] as const
+export const ALL_RECIPES_LABEL = 'Все рецепты'
 
 export const recipeCoverPalettes = [
   { color: '#405b43', accent: '#d7b66a' },
