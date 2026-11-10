@@ -4,16 +4,19 @@ import { BookSpine } from './BookSpine'
 
 interface BookshelfProps {
   books: RecipeBook[]
+  selectedCategory: string
   onBookSelect: (book: RecipeBook) => void
 }
 
-export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
-  const displayBooks = [...books].sort((a, b) => categories.indexOf(a.category) - categories.indexOf(b.category))
-  const rows: RecipeBook[][] = []
-  for (let offset = 0; offset < displayBooks.length; offset += 5) {
-    rows.push(displayBooks.slice(offset, offset + 5))
-  }
-  const lastBook = rows[rows.length - 1]?.[0]
+export function Bookshelf({ books, selectedCategory, onBookSelect }: BookshelfProps) {
+  const displayCategories = selectedCategory === categories[0]
+    ? categories.slice(1)
+    : [selectedCategory]
+  const rows = displayCategories.map((category) => ({
+    category,
+    books: books.filter((book) => book.category === category),
+  }))
+  const lastCategory = rows[rows.length - 1]?.category
 
   return (
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
@@ -22,18 +25,18 @@ export function Bookshelf({ books, onBookSelect }: BookshelfProps) {
         return (
           <div className={`shelf-row${nextRow ? '' : ' shelf-row-last'}`} key={index}>
             <div className="shelf-books">
-              {row.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
+              {row.books.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
             </div>
             {nextRow && (
               <div className="shelf-plank">
-                <div className="shelf-row-label" aria-hidden="true">{row[0].category}</div>
+                <div className="shelf-row-label" aria-hidden="true">{row.category}</div>
               </div>
             )}
           </div>
         )
       })}
       <div className="cabinet-base" aria-hidden="true">
-        {lastBook && <div className="shelf-row-label">{lastBook.category}</div>}
+        {lastCategory && <div className="shelf-row-label">{lastCategory}</div>}
       </div>
     </div>
   )
