@@ -7,6 +7,27 @@ import { CategoryFilter } from './components/CategoryFilter'
 import { SearchBar } from './components/SearchBar'
 import type { RecipeBook, RecipeCategory } from './types/recipe'
 
+function isValidIngredientUnit(unit: string) {
+  const value = unit.trim()
+  return value.length > 0 && !/^\d+(?:[.,]\d+)?$/.test(value)
+}
+
+function formatIngredientAmount(ingredient: RecipeIngredient) {
+  const unit = isValidIngredientUnit(ingredient.unit) ? ingredient.unit.trim() : ''
+  const parts: string[] = []
+
+  if (ingredient.quantity != null) {
+    parts.push(unit
+      ? `${ingredient.quantity.toLocaleString('ru-RU')} ${unit}`
+      : `${ingredient.quantity.toLocaleString('ru-RU')} · единица не указана`)
+  } else if (unit) {
+    parts.push(unit)
+  }
+
+  if (ingredient.note.trim()) parts.push(ingredient.note.trim())
+  return parts.join(' · ') || 'Количество не указано'
+}
+
 function App() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<string>('Все рецепты')
@@ -100,14 +121,21 @@ function App() {
       {selectedRecipe && <div className="dialog-backdrop" role="presentation" onClick={closeRecipe}>
         <section className="book-dialog recipe-dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" onClick={(event) => event.stopPropagation()}>
           <button className="dialog-close" onClick={closeRecipe} aria-label="Закрыть">×</button>
+          <button className="recipe-print-button" type="button" onClick={() => window.print()} title="Откроется окно печати, где можно выбрать «Сохранить в PDF»">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M7 14h10v7H7zM17 11h.01"/></svg>
+            Сохранить в PDF
+          </button>
           <p className="eyebrow small">{selectedRecipe.category}</p>
           <h2 id="dialog-title">{selectedRecipe.title}</h2>
-          {selectedRecipe.image_url && <img className="recipe-image" src={selectedRecipe.image_url} alt={selectedRecipe.title} />}
           {selectedRecipe.summary && <p className="recipe-summary">{selectedRecipe.summary}</p>}
+          {selectedRecipe.image_url && <img className="recipe-image" src={selectedRecipe.image_url} alt={selectedRecipe.title} />}
           <p className="recipe-meta">Порций: {selectedRecipe.servings} · Подготовка: {selectedRecipe.prep_minutes} мин. · Готовка: {selectedRecipe.cook_minutes} мин.</p>
           {selectedRecipe.description && <p className="recipe-description">{selectedRecipe.description}</p>}
           {loadingDetails ? <p className="recipe-empty">Загружаем рецепт…</p> : <>
-            {ingredients.length > 0 && <div className="recipe-detail-section"><h3>Ингредиенты</h3><ul>{ingredients.map((ingredient) => <li key={ingredient.id}><span>{ingredient.name}</span><span>{ingredient.quantity == null ? '' : ingredient.quantity.toLocaleString('ru-RU')} {ingredient.unit} {ingredient.note}</span></li>)}</ul></div>}
+            {ingredients.length > 0 && <div className="recipe-detail-section"><h3>Ингредиенты</h3><ul>{ingredients.map((ingredient) => {
+              const missingUnit = ingredient.quantity != null && !isValidIngredientUnit(ingredient.unit)
+              return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatIngredientAmount(ingredient)}</span></li>
+            })}</ul></div>}
             {steps.length > 0 && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
           </>}
           {recipeError && <p className="admin-error" role="alert">{recipeError}</p>}
