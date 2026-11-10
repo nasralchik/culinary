@@ -4,6 +4,7 @@ import type { RecipeCategory } from '../types/recipe'
 export interface PublicRecipe {
   id: string
   title: string
+  category: RecipeCategory
   summary: string
   description: string
   servings: number
@@ -39,25 +40,24 @@ export async function getPublishedRecipeCount(): Promise<number | null> {
   return count ?? 0
 }
 
-export async function getPublishedRecipes(category: RecipeCategory): Promise<PublicRecipe[]> {
+export async function getPublishedRecipes(): Promise<PublicRecipe[]> {
   if (!supabase) return []
 
-  const { data: categoryRow, error: categoryError } = await supabase
-    .from('recipe_categories')
-    .select('id')
-    .eq('title', category)
-    .maybeSingle()
-  if (categoryError) throw categoryError
-  if (!categoryRow) return []
+  const [categoryResult, recipeResult] = await Promise.all([
+    supabase.from('recipe_categories').select('id,title').order('sort_order'),
+    supabase.from('recipes')
+      .select('id,title,category_id,summary,description,servings,prep_minutes,cook_minutes,image_url,youtube_url')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false }),
+  ])
+  if (categoryResult.error) throw categoryResult.error
+  if (recipeResult.error) throw recipeResult.error
 
-  const { data, error } = await supabase
-    .from('recipes')
-    .select('id,title,summary,description,servings,prep_minutes,cook_minutes,image_url,youtube_url')
-    .eq('category_id', categoryRow.id)
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
-  if (error) throw error
-  return (data ?? []) as PublicRecipe[]
+  const categoryById = new Map((categoryResult.data ?? []).map((category) => [category.id, category.title as RecipeCategory]))
+  return (recipeResult.data ?? []).flatMap((recipe) => {
+    const category = recipe.category_id ? categoryById.get(recipe.category_id) : undefined
+    return category ? [{ ...recipe, category } as PublicRecipe] : []
+  })
 }
 
 export async function getRecipeDetails(recipeId: string): Promise<{ ingredients: RecipeIngredient[]; steps: RecipeStep[] }> {
