@@ -146,20 +146,6 @@ main { position: relative; z-index: 1; }
   border: 1px solid rgba(244,211,148,.55);
   pointer-events: none;
 }
-.cabinet-crown {
-  position: relative;
-  z-index: 5;
-  height: 0;
-  background: none;
-  border: 0;
-  box-shadow: none;
-}
-.cabinet-crown > .shelf-row-label {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
 .shelf-row {
   position: relative;
   min-height: 220px;
