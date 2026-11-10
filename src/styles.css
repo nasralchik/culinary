@@ -125,7 +125,7 @@ main { position: relative; z-index: 1; }
   color: #f4e4bf;
 }
 
-/* Five even rows, with each category plaque attached to its proper edge. */
+/* Published recipes are the covers, grouped by category across the shelf levels. */
 .shelf-cabinet {
   position: relative;
   isolation: isolate;
@@ -378,13 +378,6 @@ main { position: relative; z-index: 1; }
 .recipe-dialog { text-align: left; }
 .recipe-dialog h2 { text-align: center; margin: 16px 0 24px; }
 .recipe-dialog > h2 + p { margin-top: 20px; }
-.recipe-back { margin: 0 0 12px; padding: 0 0 8px; border: 0; background: transparent; color: #715a39; font: 600 13px var(--font-ui); cursor: pointer; }
-.recipe-list { display: grid; gap: 8px; max-height: 55vh; overflow: auto; }
-.recipe-list button { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; padding: 13px 14px; border: 1px solid #b2945f; background: linear-gradient(120deg, #f4e9cf, #e7d5ae); color: #403526; text-align: left; cursor: pointer; }
-.recipe-list button:hover { border-color: #76552f; background: #f7edda; }
-.recipe-list button strong { color: #304338; font: 700 18px/1.35 var(--font-serif); }
-.recipe-list button small { color: #78664b; font: 13px/1.4 var(--font-ui); }
-.recipe-list button span { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: #805d31; font: 600 12px var(--font-ui); }
 .recipe-image { display: block; width: 100%; max-height: 320px; margin: 18px auto; border: 4px solid #b79258; object-fit: cover; }
 .recipe-summary { margin: 24px 0 16px; color: #725c3c; font: italic 15px/1.65 var(--font-serif); }
 .recipe-meta { margin: 16px 0; padding: 10px 0; border-block: 1px solid #c5aa78; color: #725b3a; font: 13px/1.5 var(--font-ui); text-align: center; }
