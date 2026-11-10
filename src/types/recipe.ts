@@ -1,4 +1,4 @@
-export type RecipeCategory = 'Первые блюда' | 'Выпечка' | 'Основные блюда' | 'Десерты' | 'Заготовки'
+export type RecipeCategory = string
 
 export interface RecipeBook {
   id: string
