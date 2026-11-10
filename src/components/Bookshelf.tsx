@@ -13,38 +13,51 @@ export function Bookshelf({ books, categories, selectedCategory, onBookSelect }:
   const displayCategories = selectedCategory === ALL_RECIPES_LABEL
     ? categories
     : [selectedCategory]
-  const rows = displayCategories.map((category) => ({
+  const categoryRows = displayCategories.map((category) => ({
     category,
     books: books.filter((book) => book.category === category),
   }))
+  const rows = selectedCategory === ALL_RECIPES_LABEL
+    ? categoryRows.filter((row) => row.books.length > 0)
+    : categoryRows
   const lastCategory = rows[rows.length - 1]?.category
 
   return (
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
       <div className="cabinet-crown" aria-hidden="true">
-        <svg className="crown-carving" viewBox="0 0 900 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="crown-carving" viewBox="0 0 1400 80" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-            <path strokeWidth="1.6" d="M42 27c39-18 72-18 105 0 27 15 51 15 78 1 30-16 59-16 88 0 23 12 46 12 70 0 20-10 37-10 55-2" />
-            <path strokeWidth=".8" d="M48 32c38-14 67-14 96 1 29 15 57 15 86 0 28-15 54-15 82 0 26 14 51 14 78 1 18-9 33-10 48-4" />
-            <path strokeWidth="1.2" d="M112 19c-3-8-1-13 6-16 2 8 0 13-6 16Zm53 15c-1 8 2 13 10 15 1-8-2-13-10-15Zm69-15c-2-8 1-13 8-16 1 8-2 13-8 16Zm64 19c0 8 4 12 12 13 0-8-4-12-12-13Zm67-19c-1-7 2-12 9-14 0 7-3 12-9 14Z" />
-            <path strokeWidth="1.2" d="M858 27c-39-18-72-18-105 0-27 15-51 15-78 1-30-16-59-16-88 0-23 12-46 12-70 0-20-10-37-10-55-2" />
-            <path strokeWidth=".8" d="M852 32c-38-14-67-14-96 1-29 15-57 15-86 0-28-15-54-15-82 0-26 14-51 14-78 1-18-9-33-10-48-4" />
-            <path strokeWidth="1.2" d="M788 19c3-8 1-13-6-16-2 8 0 13 6 16Zm-53 15c1 8-2 13-10 15-1-8 2-13 10-15Zm-69-15c2-8-1-13-8-16-1 8 2 13 8 16Zm-64 19c0 8-4 12-12 13 0-8 4-12 12-13Zm-67-19c1-7-2-12-9-14 0 7 3 12 9 14Z" />
+            <path strokeWidth="2" d="M330 37c58-27 104-27 148 0 36 21 72 22 111 2 41-21 78-21 117 0 34 18 66 19 102 2 26-13 48-14 72-5" />
+            <path strokeWidth="1" d="M337 43c54-21 98-21 137 1 43 23 81 23 123 1 39-21 75-21 114 0 37 20 73 20 112 1 25-12 45-14 66-8" />
+            <path strokeWidth="1.1" d="M354 32c34-10 65-9 92 4 25 12 48 17 72 14m480-18c-34-10-65-9-92 4-25 12-48 17-72 14" opacity=".8" />
+            <path strokeWidth="1.7" d="M43 59c3-13 13-20 30-20 17 0 27-8 29-22 2 14 11 22 28 22 16 0 26 8 28 22m-116-3c8-8 17-12 29-12m57 0c11 1 20 5 28 12" />
+            <path strokeWidth="1.1" d="M45 53c-1-11 4-18 15-22 0 10-4 17-15 22Zm35-19c-1-12 5-20 17-24 1 12-5 20-17 24Zm29 2c9-8 18-9 29-3-8 9-18 10-29 3Zm-55 21c-9 4-13 11-11 21 10-4 14-11 11-21Zm69 0c9 4 13 11 11 21-10-4-14-11-11-21Z" />
+            <path strokeWidth="1.7" d="M1357 59c-3-13-13-20-30-20-17 0-27-8-29-22-2 14-11 22-28 22-16 0-26 8-28 22m116-3c-8-8-17-12-29-12m-57 0c-11 1-20 5-28 12" />
+            <path strokeWidth="1.1" d="M1355 53c1-11-4-18-15-22 0 10 4 17 15 22Zm-35-19c1-12-5-20-17-24-1 12 5 20 17 24Zm-29 2c-9-8-18-9-29-3 8 9 18 10 29 3Zm55 21c9 4 13 11 11 21-10-4-14-11-11-21Zm-69 0c-9 4-13 11-11 21 10-4 14-11 11-21Z" />
+            <path strokeWidth="1.2" d="M183 40c39 4 75 2 110-7m824 0c35 9 71 11 110 7" opacity=".76" />
           </g>
-          <circle cx="450" cy="26" r="17" fill="#6E4928" stroke="#E7C47C" strokeWidth="1.5" />
-          <circle cx="450" cy="26" r="13" stroke="#C59A52" strokeWidth=".8" />
-          <path d="M450 36V16m0 10c-7 0-10-4-10-9 6 0 10 3 10 9Zm0-3c0-6 4-10 10-10 0 6-4 10-10 10Zm-1 8c-4-4-8-4-12-1 3 4 7 5 12 1Zm2 0c4-4 8-4 12-1-3 4-7 5-12 1Z" fill="#E7C47C" />
-          <path d="M418 26h11m42 0h11" stroke="#E7C47C" strokeWidth="1.2" strokeLinecap="round" />
-          <path d="m412 26 3-3 3 3-3 3-3-3Zm70 0 3-3 3 3-3 3-3-3Z" fill="#E7C47C" />
+          <g fill="currentColor" opacity=".96">
+            <circle cx="700" cy="36" r="25" fill="#704827" stroke="#E7C47C" strokeWidth="2" />
+            <circle cx="700" cy="36" r="19" fill="none" stroke="#C59A52" strokeWidth="1" />
+            <path d="M700 51V23m0 17c-10 0-15-6-14-15 9 1 14 6 14 15Zm0-5c0-9 5-15 14-16 1 9-4 15-14 16Zm-2 12c-7-7-14-7-20-1 6 7 13 8 20 1Zm4 0c7-7 14-7 20-1-6 7-13 8-20 1Z" />
+            <path d="M664 36h10m52 0h10" stroke="#E7C47C" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="m653 36 5-5 5 5-5 5-5-5Zm84 0 5-5 5 5-5 5-5-5Z" />
+          </g>
         </svg>
       </div>
-      {rows.map((row, index) => {
+      {rows.length === 0 ? (
+        <div className="shelf-empty-all">На полках пока нет опубликованных рецептов</div>
+      ) : rows.map((row, index) => {
         const nextRow = rows[index + 1]
         return (
-          <div className={`shelf-row${nextRow ? '' : ' shelf-row-last'}`} key={index}>
-            <div className="shelf-books">
-              {row.books.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
-            </div>
+          <div className={`shelf-row${nextRow ? '' : ' shelf-row-last'}${row.books.length === 0 ? ' shelf-row-empty' : ''}`} key={row.category}>
+            {row.books.length > 0 ? (
+              <div className="shelf-books">
+                {row.books.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
+              </div>
+            ) : (
+              <p className="shelf-empty-category">В этой категории пока нет рецептов</p>
+            )}
             {nextRow && (
               <div className="shelf-plank">
                 <div className="shelf-row-label" aria-hidden="true">{row.category}</div>
