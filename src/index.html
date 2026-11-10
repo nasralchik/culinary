@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#263c32" />
+    <meta name="description" content="Кулинарная библиотека — собрание домашних рецептов, вкусов и историй." />
+    <title>Кулинарная библиотека — Историческая усадьба</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+    <style>[hidden] { display: none !important; }</style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="app-shell" id="home">
+        <div class="paper-grain" aria-hidden="true"></div>
+        <main id="library">
+          <section class="library-section" aria-label="Коллекция рецептов">
+            <div class="library-tools"><label class="search-box"><span class="search-icon" aria-hidden="true">⌕</span><input id="book-search" type="search" placeholder="Найдите рецепт или любимое блюдо…" aria-label="Поиск рецептов"></label><button class="admin-entry" type="button" aria-label="Админ-панель" title="Админ-панель" onclick="alert('Откройте опубликованную версию сайта, чтобы войти в панель управления.')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="m16.5 3.5 4 4L8 20l-5 1 1-5Z"/></svg></button></div>
+            <div class="category-list" role="group" aria-label="Фильтр по разделам"><button class="category-chip selected" aria-pressed="true">Все рецепты</button><button class="category-chip" aria-pressed="false">Первые блюда</button><button class="category-chip" aria-pressed="false">Выпечка</button><button class="category-chip" aria-pressed="false">Основные блюда</button><button class="category-chip" aria-pressed="false">Десерты</button><button class="category-chip" aria-pressed="false">Заготовки</button></div>
+            <div class="shelf-cabinet" aria-label="Библиотека рецептов">
+              <div class="cabinet-crown" aria-hidden="true"></div>
+              <div class="shelf-row"><div class="shelf-books">
+                <div class="book-wrap" data-category="Первые блюда" data-search="Супы русской усадьбы Душистые и наваристые"><button class="book-spine" style="--book-color:#405b43;--book-accent:#d7b66a"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Супы русской усадьбы</span><span class="book-subtitle">Душистые и наваристые</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Выпечка" data-search="Пироги и караваи Из печи к столу"><button class="book-spine" style="--book-color:#9a4939;--book-accent:#e4c984"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Пироги и караваи</span><span class="book-subtitle">Из печи — к столу</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Заготовки" data-search="Дары леса Грибы ягоды травы"><button class="book-spine" style="--book-color:#31595a;--book-accent:#d9bd78"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Дары леса</span><span class="book-subtitle">Грибы, ягоды, травы</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+              </div><div class="shelf-plank"></div></div>
+              <div class="shelf-row"><div class="shelf-books">
+                <div class="book-wrap" data-category="Основные блюда" data-search="Праздничный стол Блюда для гостей"><button class="book-spine" style="--book-color:#665044;--book-accent:#ddc78c"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Праздничный стол</span><span class="book-subtitle">Блюда для гостей</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Десерты" data-search="Сладости к чаю Мёд орехи ягоды"><button class="book-spine" style="--book-color:#8b6940;--book-accent:#f0d99b"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Сладости к чаю</span><span class="book-subtitle">Мёд, орехи и ягоды</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Основные блюда" data-search="Каши да кулебяки Сытная старина"><button class="book-spine" style="--book-color:#72513e;--book-accent:#dfbe70"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Каши да кулебяки</span><span class="book-subtitle">Сытная старина</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+              </div><div class="shelf-plank"></div></div>
+              <div class="shelf-row"><div class="shelf-books">
+                <div class="book-wrap" data-category="Заготовки" data-search="Огородные припасы Соленья маринады"><button class="book-spine" style="--book-color:#566047;--book-accent:#d9c278"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Огородные припасы</span><span class="book-subtitle">Соленья и маринады</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Десерты" data-search="Самоварные истории Варенье напитки"><button class="book-spine" style="--book-color:#78404a;--book-accent:#e0c480"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Самоварные истории</span><span class="book-subtitle">Варенье и напитки</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Основные блюда" data-search="Рыбные сказания Реки озёра"><button class="book-spine" style="--book-color:#3c5360;--book-accent:#d9be7d"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Рыбные сказания</span><span class="book-subtitle">Реки и озёра</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+              </div><div class="shelf-plank"></div></div>
+              <div class="shelf-row"><div class="shelf-books">
+                <div class="book-wrap" data-category="Выпечка" data-search="Хлебный дом Закваски хлеба"><button class="book-spine" style="--book-color:#915b32;--book-accent:#ebd49b"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Хлебный дом</span><span class="book-subtitle">Закваски и хлеба</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Первые блюда" data-search="Постная трапеза Щедрость простых даров"><button class="book-spine" style="--book-color:#4a604c;--book-accent:#d0b36c"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Постная трапеза</span><span class="book-subtitle">Щедрость простых даров</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+                <div class="book-wrap" data-category="Заготовки" data-search="Из погреба с любовью Домашние заготовки"><button class="book-spine" style="--book-color:#6a4858;--book-accent:#e2cb8d"><span class="book-top-rule"></span><span class="book-ornament">✳</span><span class="book-title">Из погреба с любовью</span><span class="book-subtitle">Домашние заготовки</span><span class="book-ornament bottom">✦</span><span class="book-bottom-rule"></span></button></div>
+              </div><div class="shelf-plank"></div></div>
+              <div class="shelf-row"><div class="shelf-books"><div class="shelf-note" style="display:flex"><span>✦</span><small>Новые истории<br>скоро появятся здесь</small></div></div><div class="shelf-plank"></div></div>
+              <div class="cabinet-base" aria-hidden="true"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script>
+      if (location.protocol === 'file:') {
+        const search = document.getElementById('book-search');
+        const chips = [...document.querySelectorAll('.category-chip')];
+        const wraps = [...document.querySelectorAll('.book-wrap[data-category]')];
+        let category = 'Все рецепты';
+        function filterBooks() {
+          const query = search.value.trim().toLocaleLowerCase('ru');
+          for (const wrap of wraps) {
+            const visible = (category === 'Все рецепты' || wrap.dataset.category === category) && (!query || wrap.dataset.search.toLocaleLowerCase('ru').includes(query));
+            wrap.hidden = !visible;
+          }
+        }
+        search.addEventListener('input', filterBooks);
+        chips.forEach((chip) => chip.addEventListener('click', () => {
+          category = chip.textContent.trim();
+          chips.forEach((item) => { const selected = item === chip; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); });
+          filterBooks();
+        }));
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
