@@ -17,8 +17,6 @@ function safeFileName(title: string) {
 
 export async function downloadRecipePdfFile({ recipe, ingredients, steps }: RecipePdfData) {
   const content: unknown[] = [
-    { text: 'КУЛИНАРНАЯ БИБЛИОТЕКА', style: 'brand', margin: [0, 0, 0, 8] },
-    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 486, y2: 0, lineWidth: 1.1, lineColor: '#B48949' }], margin: [0, 0, 0, 23] },
     { text: recipe.category.toLocaleUpperCase('ru-RU'), style: 'category', margin: [0, 0, 0, 10] },
     { text: recipe.title, style: 'title', margin: [0, 0, 0, recipe.summary ? 10 : 22] },
   ]
@@ -85,15 +83,13 @@ export async function downloadRecipePdfFile({ recipe, ingredients, steps }: Reci
     }),
     footer: (currentPage: number, pageCount: number) => ({
       margin: [54, 0, 54, 31],
-      columns: [
-        { text: 'Семейное собрание рецептов', style: 'footer' },
-        { text: `${currentPage} / ${pageCount}`, style: 'footer', alignment: 'right' },
-      ],
+      text: `${currentPage} / ${pageCount}`,
+      style: 'footer',
+      alignment: 'right',
     }),
     defaultStyle: { font: 'Roboto', color: '#403629', fontSize: 10.5, lineHeight: 1.35 },
     content,
     styles: {
-      brand: { fontSize: 9, bold: true, color: '#8A6937', characterSpacing: 1.5 },
       category: { fontSize: 9, bold: true, color: '#956D34', characterSpacing: 1.4, alignment: 'center' },
       title: { fontSize: 27, bold: true, color: '#263D30', alignment: 'center', lineHeight: 1.2 },
       subtitle: { fontSize: 13, italics: true, color: '#725C3C', alignment: 'center', lineHeight: 1.35 },
