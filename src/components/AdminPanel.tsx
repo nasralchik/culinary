@@ -1,11 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
-import type { RecipeCategory } from '../types/recipe'
+import { ALL_RECIPES_LABEL } from '../data/books'
 
 interface CategoryRow {
   id: string
-  title: RecipeCategory
+  title: string
+  slug: string
+  sort_order: number
+}
+
+interface CategoryDraft {
+  id?: string
+  title: string
+  sort_order: string
 }
 
 interface RecipeRow {
@@ -49,6 +57,8 @@ const emptyDraft: RecipeDraft = {
   prep_minutes: '0', cook_minutes: '0', image_url: '', youtube_url: '', is_published: false,
 }
 
+const emptyCategoryDraft: CategoryDraft = { title: '', sort_order: '1' }
+
 const transliteration: Record<string, string> = {
   а:'a', б:'b', в:'v', г:'g', д:'d', е:'e', ё:'yo', ж:'zh', з:'z', и:'i', й:'y', к:'k', л:'l', м:'m', н:'n', о:'o', п:'p', р:'r', с:'s', т:'t', у:'u', ф:'f', х:'kh', ц:'ts', ч:'ch', ш:'sh', щ:'shch', ы:'y', э:'e', ю:'yu', я:'ya', ъ:'', ь:'',
 }
@@ -63,6 +73,8 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [checking, setChecking] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [categories, setCategories] = useState<CategoryRow[]>([])
+  const [categoryDraft, setCategoryDraft] = useState<CategoryDraft>(emptyCategoryDraft)
+  const [adminView, setAdminView] = useState<'recipes' | 'categories'>('recipes')
   const [recipes, setRecipes] = useState<RecipeRow[]>([])
   const [draft, setDraft] = useState<RecipeDraft>(emptyDraft)
   const [ingredients, setIngredients] = useState<IngredientDraft[]>([{ name: '', quantity: '', unit: '', note: '' }])
@@ -90,7 +102,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setUser(currentUser)
     if (allowed) {
       const [categoryResult, recipeResult] = await Promise.all([
-        supabase.from('recipe_categories').select('id,title').order('sort_order'),
+        supabase.from('recipe_categories').select('id,title,slug,sort_order').order('sort_order'),
         supabase.from('recipes').select('id,title,slug,category_id,summary,description,servings,prep_minutes,cook_minutes,image_url,youtube_url,is_published').order('created_at', { ascending: false }),
       ])
       if (categoryResult.error || recipeResult.error) {
@@ -100,6 +112,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         setCategories(categoryRows)
         setRecipes((recipeResult.data ?? []) as RecipeRow[])
         setDraft((current) => ({ ...current, category_id: current.category_id || categoryRows[0]?.id || '' }))
+        setCategoryDraft((current) => ({ ...current, sort_order: current.sort_order === '1' ? String(categoryRows.length + 1) : current.sort_order }))
       }
     }
     setChecking(false)
@@ -180,11 +193,54 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   }
 
   function resetDraft() {
+    setAdminView('recipes')
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
     setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
     setSteps([''])
     setNotice('Новый рецепт')
     setError('')
+  }
+
+  function startNewCategory() {
+    setCategoryDraft({ ...emptyCategoryDraft, sort_order: String(categories.length + 1) })
+    setNotice('Новая категория')
+    setError('')
+  }
+
+  async function saveCategory(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!supabase || !categoryDraft.title.trim()) return
+    const title = categoryDraft.title.trim()
+    if (title.toLocaleLowerCase('ru') === ALL_RECIPES_LABEL.toLocaleLowerCase('ru')) {
+      setError(`Название «${ALL_RECIPES_LABEL}» зарезервировано для общего фильтра.`)
+      return
+    }
+
+    setBusy(true)
+    setError('')
+    setNotice('Сохраняем категорию…')
+    const values = { title, sort_order: Math.max(0, Number(categoryDraft.sort_order) || 0) }
+    const result = categoryDraft.id
+      ? await supabase.from('recipe_categories').update(values).eq('id', categoryDraft.id).select('id,title,slug,sort_order').single()
+      : await supabase.from('recipe_categories').insert({ ...values, slug: makeSlug(title) || `category-${Date.now()}` }).select('id,title,slug,sort_order').single()
+
+    if (result.error || !result.data) {
+      setError(result.error?.code === '23505'
+        ? 'Категория с таким названием или адресом уже существует.'
+        : result.error?.message ?? 'Категорию не удалось сохранить.')
+      setBusy(false)
+      return
+    }
+
+    const savedCategory = result.data as CategoryRow
+    const nextCategories = [...categories.filter((item) => item.id !== savedCategory.id), savedCategory]
+      .sort((left, right) => left.sort_order - right.sort_order || left.title.localeCompare(right.title, 'ru'))
+    setCategories(nextCategories)
+    setDraft((current) => ({ ...current, category_id: current.category_id || savedCategory.id }))
+    setCategoryDraft({ ...emptyCategoryDraft, sort_order: String(nextCategories.length + 1) })
+    setNotice(categoryDraft.id ? 'Категория обновлена.' : 'Категория создана.')
+    onRecipesChanged?.()
+    setBusy(false)
   }
 
   async function saveRecipe(event: FormEvent<HTMLFormElement>) {
@@ -279,8 +335,8 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         </form>}
         {supabase && !checking && user && !isAdmin && <div className="admin-login"><p>Этот пользователь не имеет прав администратора.</p>{error && <p className="admin-error" role="alert">{error}</p>}<button className="admin-secondary" onClick={signOut}>Выйти</button></div>}
         {supabase && !checking && isAdmin && <>
-          <div className="admin-toolbar"><span>Управление рецептами</span><div><button className="admin-secondary" onClick={resetDraft}>Новый рецепт</button><button className="admin-secondary" onClick={signOut}>Выйти</button></div></div>
-          <div className="admin-content">
+          <div className="admin-toolbar"><span>Управление библиотекой</span><div className="admin-toolbar-actions"><button className={`admin-secondary${adminView === 'recipes' ? ' is-selected' : ''}`} onClick={() => setAdminView('recipes')}>Рецепты</button><button className={`admin-secondary${adminView === 'categories' ? ' is-selected' : ''}`} onClick={() => setAdminView('categories')}>Категории</button>{adminView === 'recipes' && <button className="admin-secondary" onClick={resetDraft}>Новый рецепт</button>}<button className="admin-secondary" onClick={signOut}>Выйти</button></div></div>
+          {adminView === 'recipes' ? <div className="admin-content">
             <aside className="admin-recipe-list"><h3>Рецепты ({recipes.length})</h3>{recipes.length === 0 && <p className="admin-muted">Пока рецептов нет.</p>}{recipes.map((recipe) => <div className="admin-recipe-row" key={recipe.id}><button onClick={() => void editRecipe(recipe)} disabled={busy}><strong>{recipe.title}</strong><small>{recipe.is_published ? 'Опубликован' : 'Черновик'}</small></button></div>)}</aside>
             <form className="recipe-form" onSubmit={saveRecipe}>
               <h3>{draft.id ? 'Редактировать рецепт' : 'Новый рецепт'}</h3>
@@ -297,7 +353,17 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
               {error && <p className="admin-error" role="alert">{error}</p>}{notice && !error && <p className="admin-notice" role="status">{notice}</p>}
               <button className="admin-primary" disabled={busy || !draft.title.trim() || !draft.category_id}>{busy ? 'Сохраняем…' : 'Сохранить рецепт'}</button>
             </form>
-          </div>
+          </div> : <div className="admin-content category-admin-content">
+            <aside className="admin-recipe-list"><h3>Категории ({categories.length})</h3><button type="button" className="admin-add-row" onClick={startNewCategory}>+ Новая категория</button>{categories.map((item) => <div className="admin-recipe-row" key={item.id}><button type="button" onClick={() => { setCategoryDraft({ id: item.id, title: item.title, sort_order: String(item.sort_order) }); setNotice('Редактирование категории'); setError('') }} disabled={busy}><strong>{item.title}</strong><small>Порядок на полке: {item.sort_order}</small></button></div>)}</aside>
+            <form className="recipe-form category-form" onSubmit={saveCategory}>
+              <h3>{categoryDraft.id ? 'Редактировать категорию' : 'Новая категория'}</h3>
+              <p className="admin-muted">Название появится в фильтрах, на полке и в карточках рецептов.</p>
+              <label>Название категории<input value={categoryDraft.title} onChange={(event) => setCategoryDraft((current) => ({ ...current, title: event.target.value }))} required maxLength={80} placeholder="Например: Домашние напитки" /></label>
+              <label>Порядок на полке<input type="number" min="0" step="1" value={categoryDraft.sort_order} onChange={(event) => setCategoryDraft((current) => ({ ...current, sort_order: event.target.value }))} /></label>
+              {error && <p className="admin-error" role="alert">{error}</p>}{notice && !error && <p className="admin-notice" role="status">{notice}</p>}
+              <div className="category-form-actions"><button className="admin-primary" disabled={busy || !categoryDraft.title.trim()}>{busy ? 'Сохраняем…' : 'Сохранить категорию'}</button>{categoryDraft.id && <button type="button" className="admin-secondary" onClick={startNewCategory} disabled={busy}>Отмена</button>}</div>
+            </form>
+          </div>}
         </>}
       </section>
     </div>

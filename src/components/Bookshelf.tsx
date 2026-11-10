@@ -1,16 +1,17 @@
 import type { RecipeBook } from '../types/recipe'
-import { categories } from '../data/books'
+import { ALL_RECIPES_LABEL } from '../data/books'
 import { BookSpine } from './BookSpine'
 
 interface BookshelfProps {
   books: RecipeBook[]
+  categories: string[]
   selectedCategory: string
   onBookSelect: (book: RecipeBook) => void
 }
 
-export function Bookshelf({ books, selectedCategory, onBookSelect }: BookshelfProps) {
-  const displayCategories = selectedCategory === categories[0]
-    ? categories.slice(1)
+export function Bookshelf({ books, categories, selectedCategory, onBookSelect }: BookshelfProps) {
+  const displayCategories = selectedCategory === ALL_RECIPES_LABEL
+    ? categories
     : [selectedCategory]
   const rows = displayCategories.map((category) => ({
     category,
