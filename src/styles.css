@@ -158,7 +158,7 @@ main { position: relative; z-index: 1; }
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 0);
 }
 .shelf-row {
   position: relative;
