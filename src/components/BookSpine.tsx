@@ -12,8 +12,10 @@ export function BookSpine({ book }: { book: RecipeBook }) {
       <span className="book-cover-layout">
         <span className="book-top-rule" />
         <span className="book-ornament" aria-hidden="true">✳</span>
-        <span className="book-title" title={book.title}>{book.title}</span>
-        <span className="book-subtitle" title={book.subtitle}>{book.subtitle}</span>
+        <span className="book-copy">
+          <span className="book-title" title={book.title}>{book.title}</span>
+          <span className="book-subtitle" title={book.subtitle}>{book.subtitle}</span>
+        </span>
         <span className="book-art" aria-hidden="true">{image && !imageFailed ? <img src={image} alt="" loading="lazy" onError={() => setImageFailed(true)} /> : <span className="book-art-fallback">{book.art ?? artByCategory[book.category]}</span>}</span>
         <span className="book-ornament bottom" aria-hidden="true">✦</span>
         <span className="book-bottom-rule" />
