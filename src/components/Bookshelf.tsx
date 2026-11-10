@@ -25,7 +25,8 @@ export function Bookshelf({ books, categories, selectedCategory, onBookSelect }:
   return (
     <div className="shelf-cabinet" aria-label="Библиотека рецептов">
       <div className="cabinet-crown" aria-hidden="true">
-        <svg className="crown-carving" viewBox="0 0 1440 72" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="crown-carving" viewBox="0 0 1440 88" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(0 8)">
           <g stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
             <path strokeWidth="1.1" opacity=".72" d="M14 13H1426M14 59H1426" />
             <path strokeWidth="2.1" d="M692 36c-45 0-50-19-94-19-42 0-57 34-100 34-40 0-55-23-96-23-39 0-58 20-98 20-41 0-57-20-96-20-32 0-52 15-80 20-27 5-50 1-68-10-16-10-30-9-40 3-9 11-4 23 7 23 10 0 15-8 9-15" />
@@ -53,6 +54,7 @@ export function Bookshelf({ books, categories, selectedCategory, onBookSelect }:
             <path d="M720 52V21m0 17c-9 0-14-6-13-14 8 1 13 5 13 14Zm0-6c0-9 5-14 13-15 1 9-4 15-13 15Zm-2 15c-6-7-13-7-19-2 6 7 12 8 19 2Zm4 0c6-7 13-7 19-2-6 7-12 8-19 2Z" stroke="none" />
             <circle cx="720" cy="36" r="3" fill="#5c3a20" stroke="none" />
           </g>
+          </g>
         </svg>
       </div>
       {rows.length === 0 ? (
@@ -77,6 +79,19 @@ export function Bookshelf({ books, categories, selectedCategory, onBookSelect }:
         )
       })}
       <div className="cabinet-base" aria-hidden="true">
+        <svg className="base-carving" viewBox="0 0 1440 38" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+            <path strokeWidth="1.4" d="M18 19h74c23 0 30-11 51-11 17 0 23 9 39 9 17 0 24-11 43-11 16 0 23 10 40 10 13 0 22-4 32-10m-279 12h104m106-2h42" />
+            <path strokeWidth="1.1" d="M48 19c-5-8-3-14 5-19 6 7 5 13-5 19Zm58-3c-1-9 4-14 13-17 3 9-1 14-13 17Zm58 2c5-7 12-10 21-8-3 8-10 11-21 8Zm54-2c-4 7-2 12 5 16 4-7 2-12-5-16Zm45-1c0-7 4-11 12-13 2 8-2 12-12 13Z" />
+          </g>
+          <g transform="translate(1440 0) scale(-1 1)" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+            <path strokeWidth="1.4" d="M18 19h74c23 0 30-11 51-11 17 0 23 9 39 9 17 0 24-11 43-11 16 0 23 10 40 10 13 0 22-4 32-10m-279 12h104m106-2h42" />
+            <path strokeWidth="1.1" d="M48 19c-5-8-3-14 5-19 6 7 5 13-5 19Zm58-3c-1-9 4-14 13-17 3 9-1 14-13 17Zm58 2c5-7 12-10 21-8-3 8-10 11-21 8Zm54-2c-4 7-2 12 5 16 4-7 2-12-5-16Zm45-1c0-7 4-11 12-13 2 8-2 12-12 13Z" />
+          </g>
+          <g fill="currentColor">
+            <path d="m710 19 10-8 10 8-10 8-10-8Z" />
+          </g>
+        </svg>
         {lastCategory && <div className="shelf-row-label">{lastCategory}</div>}
       </div>
     </div>
