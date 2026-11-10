@@ -12,14 +12,15 @@ function isValidIngredientUnit(unit: string) {
   return value.length > 0 && !/^\d+(?:[.,]\d+)?$/.test(value)
 }
 
-function formatIngredientAmount(ingredient: RecipeIngredient) {
+function formatIngredientAmount(ingredient: RecipeIngredient, multiplier = 1) {
   const unit = isValidIngredientUnit(ingredient.unit) ? ingredient.unit.trim() : ''
   const parts: string[] = []
 
   if (ingredient.quantity != null) {
+    const quantity = ingredient.quantity * multiplier
     parts.push(unit
-      ? `${ingredient.quantity.toLocaleString('ru-RU')} ${unit}`
-      : `${ingredient.quantity.toLocaleString('ru-RU')} · единица не указана`)
+      ? `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 3 })} ${unit}`
+      : `${quantity.toLocaleString('ru-RU', { maximumFractionDigits: 3 })} · единица не указана`)
   } else if (unit) {
     parts.push(unit)
   }
@@ -36,6 +37,8 @@ function App() {
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null)
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([])
   const [steps, setSteps] = useState<RecipeStep[]>([])
+  const [scaleIngredientId, setScaleIngredientId] = useState('')
+  const [scaleTarget, setScaleTarget] = useState('')
   const [loadingLibrary, setLoadingLibrary] = useState(true)
   const [loadingDetails, setLoadingDetails] = useState(false)
   const [libraryError, setLibraryError] = useState('')
@@ -62,6 +65,8 @@ function App() {
     let active = true
     setIngredients([])
     setSteps([])
+    setScaleIngredientId('')
+    setScaleTarget('')
     setRecipeError('')
     setLoadingDetails(true)
     getRecipeDetails(selectedRecipeId)
@@ -69,6 +74,9 @@ function App() {
         if (active) {
           setIngredients(details.ingredients)
           setSteps(details.steps)
+          const firstScalable = details.ingredients.find((ingredient) => ingredient.quantity != null && ingredient.quantity > 0)
+          setScaleIngredientId(firstScalable?.id ?? '')
+          setScaleTarget(firstScalable?.quantity == null ? '' : String(firstScalable.quantity))
         }
       })
       .catch(() => { if (active) setRecipeError('Состав и приготовление рецепта не удалось загрузить.') })
@@ -98,9 +106,17 @@ function App() {
   }), [filteredRecipes, recipes])
 
   const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) ?? null
+  const scalableIngredients = ingredients.filter((ingredient) => ingredient.quantity != null && ingredient.quantity > 0)
+  const selectedScaleIngredient = scalableIngredients.find((ingredient) => ingredient.id === scaleIngredientId) ?? scalableIngredients[0]
+  const requestedScaleQuantity = Number(scaleTarget)
+  const scaleFactor = selectedScaleIngredient && scaleTarget.trim() && Number.isFinite(requestedScaleQuantity) && requestedScaleQuantity > 0
+    ? requestedScaleQuantity / (selectedScaleIngredient.quantity ?? 1)
+    : 1
   const closeRecipe = () => {
     setSelectedRecipeId(null)
     setRecipeError('')
+    setScaleIngredientId('')
+    setScaleTarget('')
   }
 
   return (
@@ -129,12 +145,26 @@ function App() {
           <h2 id="dialog-title">{selectedRecipe.title}</h2>
           {selectedRecipe.summary && <p className="recipe-summary">{selectedRecipe.summary}</p>}
           {selectedRecipe.image_url && <img className="recipe-image" src={selectedRecipe.image_url} alt={selectedRecipe.title} />}
-          <p className="recipe-meta">Порций: {selectedRecipe.servings} · Подготовка: {selectedRecipe.prep_minutes} мин. · Готовка: {selectedRecipe.cook_minutes} мин.</p>
           {selectedRecipe.description && <p className="recipe-description">{selectedRecipe.description}</p>}
           {loadingDetails ? <p className="recipe-empty">Загружаем рецепт…</p> : <>
-            {ingredients.length > 0 && <div className="recipe-detail-section"><h3>Ингредиенты</h3><ul>{ingredients.map((ingredient) => {
+            {ingredients.length > 0 && <div className="recipe-detail-section"><h3>Ингредиенты</h3>
+              {scalableIngredients.length > 0 && selectedScaleIngredient && <div className="recipe-scaler">
+                <div className="recipe-scaler-heading"><strong>Изменить количество</strong><span>Остальные ингредиенты пересчитаются пропорционально.</span></div>
+                <div className="recipe-scaler-controls">
+                  <label>Пересчитать по продукту<select value={selectedScaleIngredient.id} onChange={(event) => {
+                    const nextIngredient = scalableIngredients.find((ingredient) => ingredient.id === event.target.value)
+                    if (nextIngredient) {
+                      setScaleIngredientId(nextIngredient.id)
+                      setScaleTarget(String(nextIngredient.quantity))
+                    }
+                  }}>{scalableIngredients.map((ingredient) => <option key={ingredient.id} value={ingredient.id}>{ingredient.name}</option>)}</select></label>
+                  <label>Новое количество<div className="recipe-scaler-amount"><input type="number" min="0.001" step="any" aria-label={`Новое количество ингредиента: ${selectedScaleIngredient.name}`} value={scaleTarget} onChange={(event) => setScaleTarget(event.target.value)} /><span>{isValidIngredientUnit(selectedScaleIngredient.unit) ? selectedScaleIngredient.unit : 'ед.'}</span></div></label>
+                  <button type="button" className="recipe-scaler-reset" onClick={() => setScaleTarget(String(selectedScaleIngredient.quantity))}>Исходное количество</button>
+                </div>
+              </div>}
+              <ul>{ingredients.map((ingredient) => {
               const missingUnit = ingredient.quantity != null && !isValidIngredientUnit(ingredient.unit)
-              return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatIngredientAmount(ingredient)}</span></li>
+              return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatIngredientAmount(ingredient, scaleFactor)}</span></li>
             })}</ul></div>}
             {steps.length > 0 && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
           </>}
