@@ -140,8 +140,9 @@ function App() {
         })),
         steps: steps.map((step) => step.instruction),
       })
-    } catch {
-      setPdfError('PDF не удалось создать. Попробуйте ещё раз.')
+    } catch (error) {
+      console.error('PDF creation failed:', error)
+      setPdfError(error instanceof Error ? `Не удалось создать PDF: ${error.message}` : 'Не удалось создать PDF. Попробуйте ещё раз.')
     } finally {
       setCreatingPdf(false)
     }
@@ -168,12 +169,11 @@ function App() {
           <div className="recipe-dialog-topline">
             <p className="eyebrow small">{selectedRecipe.category}</p>
             <div className="recipe-dialog-actions">
-              <button className="recipe-print-button" type="button" onClick={() => void downloadRecipePdf()} disabled={creatingPdf || loadingDetails}>
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v4h14v-4"/></svg>
-                {creatingPdf ? 'Создаём PDF…' : 'Сохранить в PDF'}
+              <button className="recipe-print-button recipe-icon-button" type="button" onClick={() => void downloadRecipePdf()} disabled={creatingPdf || loadingDetails} aria-label={creatingPdf ? 'Создаём PDF' : 'Скачать рецепт в PDF'} title={creatingPdf ? 'Создаём PDF…' : 'Скачать рецепт в PDF'}>
+                {creatingPdf ? <span className="recipe-pdf-spinner" aria-hidden="true" /> : <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M12 12v6m0 0 3-3m-3 3-3-3M4 7v14"/></svg>}
               </button>
-              {scalableIngredients.length > 0 && <button className="recipe-scaler-toggle" type="button" aria-expanded={showScaler} aria-controls="recipe-scaler" onClick={() => setShowScaler((visible) => !visible)}>
-                {showScaler ? 'Скрыть пересчёт' : 'Изменить количество'}
+              {scalableIngredients.length > 0 && <button className={`recipe-scaler-toggle recipe-icon-button${showScaler ? ' is-active' : ''}`} type="button" aria-expanded={showScaler} aria-controls="recipe-scaler" onClick={() => setShowScaler((visible) => !visible)} aria-label={showScaler ? 'Скрыть пересчёт количества' : 'Изменить количество'} title={showScaler ? 'Скрыть пересчёт количества' : 'Изменить количество'}>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="18" r="2" fill="currentColor"/></svg>
               </button>}
             </div>
           </div>

@@ -380,9 +380,8 @@ main { position: relative; z-index: 1; }
 .recipe-dialog > h2 + p { margin-top: 20px; }
 .recipe-dialog-topline { min-height: 38px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .recipe-dialog-topline .eyebrow { margin: 8px 0 0; }
-.recipe-dialog-actions { width: min(205px, 48%); margin-right: 34px; display: grid; gap: 6px; }
+.recipe-dialog-actions { margin-right: 34px; display: flex; align-items: center; gap: 7px; }
 .recipe-print-button, .recipe-scaler-toggle {
-  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -397,9 +396,13 @@ main { position: relative; z-index: 1; }
 }
 .recipe-print-button:hover:not(:disabled), .recipe-scaler-toggle:hover { filter: brightness(1.05); }
 .recipe-print-button:disabled { opacity: .72; cursor: wait; }
-.recipe-print-button svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.recipe-icon-button { width: 38px; height: 38px; min-height: 38px; padding: 0; }
+.recipe-icon-button svg { width: 19px; height: 19px; flex: 0 0 auto; }
 .recipe-scaler-toggle { border-color: #5d735b; background: linear-gradient(#e8e2c9, #d3d0af); color: #304338; }
-.recipe-pdf-error { margin: 10px 0; color: #8b3d31; font: 13px/1.5 var(--font-ui); }
+.recipe-scaler-toggle.is-active { background: linear-gradient(#49634b, #2b4033); color: #f4dfaa; }
+.recipe-pdf-spinner { width: 17px; height: 17px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: recipe-spin .7s linear infinite; }
+@keyframes recipe-spin { to { transform: rotate(360deg); } }
+.recipe-pdf-error { margin: 10px 0; overflow-wrap: anywhere; color: #8b3d31; font: 13px/1.5 var(--font-ui); }
 .recipe-image { display: block; width: 100%; max-height: 320px; margin: 18px auto; border: 4px solid #b79258; object-fit: cover; }
 .recipe-dialog .recipe-summary { max-width: 520px; margin: 0 auto 24px; color: #725c3c; font: italic 19px/1.55 var(--font-serif); text-align: center; }
 .recipe-description { color: #4d4030; font: 15px/1.75 var(--font-ui); white-space: pre-line; }
@@ -526,9 +529,9 @@ main { position: relative; z-index: 1; }
   .book-dialog h2 { font-size: 29px; }
   .recipe-dialog-topline { gap: 8px; }
   .recipe-dialog-topline .eyebrow { max-width: 38%; overflow-wrap: anywhere; }
-  .recipe-dialog-actions { width: min(170px, 54%); margin-right: 30px; }
-  .recipe-print-button, .recipe-scaler-toggle { min-height: 32px; padding: 5px 7px; font-size: 11px; }
-  .recipe-print-button svg { width: 15px; height: 15px; }
+  .recipe-dialog-actions { margin-right: 30px; gap: 5px; }
+  .recipe-icon-button { width: 34px; height: 34px; min-height: 34px; }
+  .recipe-icon-button svg { width: 17px; height: 17px; }
   .recipe-dialog .recipe-summary { font-size: 17px; }
   .recipe-scaler { padding: 11px; }
   .recipe-scaler-controls { grid-template-columns: minmax(0, 1fr) minmax(110px, .8fr); gap: 8px; }
