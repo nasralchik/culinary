@@ -207,6 +207,53 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setError('')
   }
 
+  async function deleteCategory(category: CategoryRow) {
+    if (!supabase || busy) return
+    setBusy(true)
+    setError('')
+    setNotice('Проверяем связанные рецепты…')
+
+    const { count, error: usageError } = await supabase
+      .from('recipes')
+      .select('id', { count: 'exact', head: true })
+      .eq('category_id', category.id)
+    if (usageError) {
+      setError(`Не удалось проверить рецепты категории «${category.title}»: ${usageError.message}`)
+      setBusy(false)
+      return
+    }
+    if ((count ?? 0) > 0) {
+      setError(`Категорию «${category.title}» нельзя удалить: к ней привязаны рецепты (${count}). Сначала перенесите их в другую категорию.`)
+      setBusy(false)
+      return
+    }
+    if (!window.confirm(`Удалить пустую категорию «${category.title}»?`)) {
+      setNotice('')
+      setBusy(false)
+      return
+    }
+
+    setNotice('Удаляем категорию…')
+    const { error: deleteError } = await supabase.from('recipe_categories').delete().eq('id', category.id)
+    if (deleteError) {
+      setError(deleteError.message)
+      setBusy(false)
+      return
+    }
+
+    const nextCategories = categories.filter((item) => item.id !== category.id)
+    setCategories(nextCategories)
+    setDraft((current) => current.category_id === category.id
+      ? { ...current, category_id: nextCategories[0]?.id ?? '' }
+      : current)
+    if (categoryDraft.id === category.id) {
+      setCategoryDraft({ ...emptyCategoryDraft, sort_order: String(nextCategories.length + 1) })
+    }
+    setNotice('Категория удалена.')
+    onRecipesChanged?.()
+    setBusy(false)
+  }
+
   async function saveCategory(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!supabase || !categoryDraft.title.trim()) return
@@ -354,10 +401,16 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
               <button className="admin-primary" disabled={busy || !draft.title.trim() || !draft.category_id}>{busy ? 'Сохраняем…' : 'Сохранить рецепт'}</button>
             </form>
           </div> : <div className="admin-content category-admin-content">
-            <aside className="admin-recipe-list"><h3>Категории ({categories.length})</h3><button type="button" className="admin-add-row" onClick={startNewCategory}>+ Новая категория</button>{categories.map((item) => <div className="admin-recipe-row" key={item.id}><button type="button" onClick={() => { setCategoryDraft({ id: item.id, title: item.title, sort_order: String(item.sort_order) }); setNotice('Редактирование категории'); setError('') }} disabled={busy}><strong>{item.title}</strong><small>Порядок на полке: {item.sort_order}</small></button></div>)}</aside>
+            <aside className="admin-recipe-list"><h3>Категории ({categories.length})</h3><button type="button" className="admin-add-row" onClick={startNewCategory}>+ Новая категория</button>{categories.map((item) => {
+              const recipeCount = recipes.filter((recipe) => recipe.category_id === item.id).length
+              return <div className="admin-recipe-row category-row" key={item.id}>
+                <button type="button" onClick={() => { setCategoryDraft({ id: item.id, title: item.title, sort_order: String(item.sort_order) }); setNotice('Редактирование категории'); setError('') }} disabled={busy}><strong>{item.title}</strong><small>{recipeCount ? `Рецептов: ${recipeCount}` : 'Нет рецептов'} · Порядок на полке: {item.sort_order}</small></button>
+                <button type="button" className="admin-delete admin-category-delete" aria-label={`Удалить категорию ${item.title}`} title={recipeCount ? 'Сначала перенесите её рецепты в другую категорию' : 'Удалить категорию'} onClick={() => void deleteCategory(item)} disabled={busy}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg></button>
+              </div>
+            })}</aside>
             <form className="recipe-form category-form" onSubmit={saveCategory}>
               <h3>{categoryDraft.id ? 'Редактировать категорию' : 'Новая категория'}</h3>
-              <p className="admin-muted">Название появится в фильтрах, на полке и в карточках рецептов.</p>
+              <p className="admin-muted">Название появится в фильтрах, на полке и в карточках рецептов. Удалять можно только категории без привязанных рецептов.</p>
               <label>Название категории<input value={categoryDraft.title} onChange={(event) => setCategoryDraft((current) => ({ ...current, title: event.target.value }))} required maxLength={80} placeholder="Например: Домашние напитки" /></label>
               <label>Порядок на полке<input type="number" min="0" step="1" value={categoryDraft.sort_order} onChange={(event) => setCategoryDraft((current) => ({ ...current, sort_order: event.target.value }))} /></label>
               {error && <p className="admin-error" role="alert">{error}</p>}{notice && !error && <p className="admin-notice" role="status">{notice}</p>}
