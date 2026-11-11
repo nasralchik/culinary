@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="wood" x1="42" y1="24" x2="466" y2="492" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9b6b3b"/>
+      <stop offset=".28" stop-color="#57381f"/>
+      <stop offset=".72" stop-color="#392719"/>
+      <stop offset="1" stop-color="#8b6035"/>
+    </linearGradient>
+    <radialGradient id="leather" cx="0" cy="0" r="1" gradientTransform="matrix(0 330 -280 0 256 160)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#52694a"/>
+      <stop offset=".56" stop-color="#304b37"/>
+      <stop offset="1" stop-color="#1d3026"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="90" y1="0" x2="420" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff0b8"/>
+      <stop offset=".32" stop-color="#d7ae5e"/>
+      <stop offset=".68" stop-color="#f5d887"/>
+      <stop offset="1" stop-color="#956831"/>
+    </linearGradient>
+    <linearGradient id="page" x1="343" y1="150" x2="376" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff0c9"/>
+      <stop offset="1" stop-color="#c8a66b"/>
+    </linearGradient>
+    <linearGradient id="bowl" x1="218" y1="278" x2="294" y2="342" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f4d890"/>
+      <stop offset="1" stop-color="#b37b39"/>
+    </linearGradient>
+    <filter id="shadow" x="92" y="76" width="340" height="378" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dy="9"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".42"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Carved oak frame and deep green leather ground -->
+  <rect x="10" y="10" width="492" height="492" rx="54" fill="url(#wood)" stroke="#362416" stroke-width="8"/>
+  <rect x="22" y="22" width="468" height="468" rx="44" stroke="url(#gold)" stroke-width="3"/>
+  <rect x="31" y="31" width="450" height="450" rx="37" fill="url(#leather)" stroke="#4c321d" stroke-width="4"/>
+  <rect x="43" y="43" width="426" height="426" rx="30" stroke="url(#gold)" stroke-width="2.5"/>
+  <rect x="51" y="51" width="410" height="410" rx="25" stroke="#a77d43" stroke-opacity=".72" stroke-width="1.5"/>
+
+  <!-- Small engraved corner leaves -->
+  <g stroke="url(#gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".94">
+    <path d="M67 122c14-3 23-13 25-28 12 8 17 18 15 30 10-1 18 3 24 12-17-2-29 4-37 18-2-13-10-22-27-27Z"/>
+    <path d="M445 122c-14-3-23-13-25-28-12 8-17 18-15 30-10-1-18 3-24 12 17-2 29 4 37 18 2-13 10-22 27-27Z"/>
+    <path d="M67 390c14 3 23 13 25 28 12-8 17-18 15-30 10 1 18-3 24-12-17 2-29-4-37-18-2 13-10 22-27 27Z"/>
+    <path d="M445 390c-14 3-23 13-25 28-12-8-17-18-15-30-10 1-18-3-24-12 17 2 29-4 37-18 2 13 10 22 27 27Z"/>
+  </g>
+  <g fill="url(#gold)">
+    <path d="M94 80c8-13 18-18 31-16-3 12-10 20-23 24Zm324 0c-8-13-18-18-31-16 3 12 10 20 23 24ZM94 432c8 13 18 18 31 16-3-12-10-20-23-24Zm324 0c-8 13-18 18-31 16 3-12 10-20 23-24Z"/>
+  </g>
+
+  <!-- Upright family cookbook, with gold tooling and page edges -->
+  <g filter="url(#shadow)">
+    <path d="M350 124 378 140v264l-28 20Z" fill="url(#page)" stroke="#8e6838" stroke-width="4"/>
+    <path d="m357 145 13 7v235l-13 9Z" stroke="#a27b42" stroke-width="2" opacity=".8"/>
+    <path d="M143 111h211v300H143c-9 0-16-7-16-16V127c0-9 7-16 16-16Z" fill="url(#leather)" stroke="url(#gold)" stroke-width="6"/>
+    <path d="M145 123h199v276H145c-4 0-7-3-7-7V130c0-4 3-7 7-7Z" stroke="#e2c06f" stroke-width="2"/>
+    <path d="M166 125v273m9-273v273" stroke="#c69b50" stroke-width="2" opacity=".9"/>
+    <path d="M154 146h177m-177 230h177" stroke="url(#gold)" stroke-width="3"/>
+    <path d="M154 154h177m-177 214h177" stroke="#c89d52" stroke-width="1.5"/>
+
+    <!-- Tiny floral book tooling -->
+    <path d="M254 164c-5-10-4-19 3-26 7 8 8 16 3 26 10-5 18-4 24 3-9 7-17 8-26 3 5 10 4 18-3 25-7-8-8-16-3-26-10 5-18 4-24-3 9-7 17-8 26-2Z" fill="url(#gold)"/>
+
+    <!-- A steaming copper bowl: recipe and cooking in one clear mark -->
+    <circle cx="256" cy="285" r="67" fill="#20362a" stroke="url(#gold)" stroke-width="4"/>
+    <circle cx="256" cy="285" r="58" stroke="#ba914d" stroke-width="1.5"/>
+    <g stroke="url(#gold)" stroke-width="5" stroke-linecap="round">
+      <path d="M239 250c-9-10 8-16 0-27m18 27c-9-10 8-16 0-27m18 27c-9-10 8-16 0-27"/>
+    </g>
+    <path d="M220 278h72l-7 31c-2 10-11 17-22 17h-14c-11 0-20-7-22-17Z" fill="url(#bowl)" stroke="#f0d48b" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M220 286c-12-1-18 4-18 12s7 12 20 10m70-22c12-1 18 4 18 12s-7 12-20 10" stroke="url(#gold)" stroke-width="5" stroke-linecap="round"/>
+    <path d="M237 333h38m-30 8h22" stroke="url(#gold)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M221 356c11-9 19-9 27 0-8 9-16 9-27 0Zm70 0c-11-9-19-9-27 0 8 9 16 9 27 0Z" fill="url(#gold)"/>
+    <path d="M254 358h4v12h-4z" fill="#e1bc69"/>
+  </g>
+
+  <!-- Centered top and bottom rosettes finish the frame -->
+  <g fill="url(#gold)" stroke="#51361e" stroke-width="1">
+    <path d="M256 68c-7-13-4-22 0-29 5 8 7 17 0 29Zm0 0c13-7 22-4 29 0-8 5-17 7-29 0Zm0 0c7 13 4 22 0 29-5-8-7-17 0-29Zm0 0c-13 7-22 4-29 0 8-5 17-7 29 0Z"/>
+    <path d="M256 444c-7-13-4-22 0-29 5 8 7 17 0 29Zm0 0c13-7 22-4 29 0-8 5-17 7-29 0Zm0 0c7 13 4 22 0 29-5-8-7-17 0-29Zm0 0c-13 7-22 4-29 0 8-5 17-7 29 0Z"/>
+  </g>
+</svg>
