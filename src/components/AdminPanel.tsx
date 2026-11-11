@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { ALL_RECIPES_LABEL } from '../data/books'
@@ -59,6 +59,14 @@ const emptyDraft: RecipeDraft = {
 
 const emptyCategoryDraft: CategoryDraft = { title: '', sort_order: '1' }
 
+const RECIPE_IMAGE_BUCKET = 'recipe-images'
+const MAX_RECIPE_IMAGE_BYTES = 5 * 1024 * 1024
+const recipeImageTypes: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+
 const ingredientUnits = [
   'г', 'кг', 'мл', 'л', 'ч. л.', 'ст. л.', 'шт.', 'стакан', 'чашка',
   'щепотка', 'зубчик', 'пучок', 'ломтик', 'головка', 'упаковка', 'банка', 'по вкусу',
@@ -82,6 +90,9 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [adminView, setAdminView] = useState<'recipes' | 'categories'>('recipes')
   const [recipes, setRecipes] = useState<RecipeRow[]>([])
   const [draft, setDraft] = useState<RecipeDraft>(emptyDraft)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState('')
+  const imagePreviewRef = useRef<string | null>(null)
   const [ingredients, setIngredients] = useState<IngredientDraft[]>([{ name: '', quantity: '', unit: '', note: '' }])
   const [steps, setSteps] = useState<string[]>([''])
   const [password, setPassword] = useState('')
@@ -90,6 +101,38 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [notice, setNotice] = useState('')
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim()
   const loginView = Boolean(supabase && adminEmail && !checking && !user)
+
+  useEffect(() => () => {
+    if (imagePreviewRef.current) URL.revokeObjectURL(imagePreviewRef.current)
+  }, [])
+
+  function clearSelectedImage() {
+    if (imagePreviewRef.current) URL.revokeObjectURL(imagePreviewRef.current)
+    imagePreviewRef.current = null
+    setImagePreview('')
+    setImageFile(null)
+  }
+
+  function selectRecipeImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0]
+    event.currentTarget.value = ''
+    if (!file) return
+    if (!recipeImageTypes[file.type]) {
+      setError('Выберите изображение в формате JPG, PNG или WebP.')
+      return
+    }
+    if (file.size > MAX_RECIPE_IMAGE_BYTES) {
+      setError('Размер изображения не должен превышать 5 МБ.')
+      return
+    }
+
+    if (imagePreviewRef.current) URL.revokeObjectURL(imagePreviewRef.current)
+    const previewUrl = URL.createObjectURL(file)
+    imagePreviewRef.current = previewUrl
+    setImagePreview(previewUrl)
+    setImageFile(file)
+    setError('')
+  }
 
   async function loadAdminData(currentUser: User) {
     if (!supabase) return
@@ -162,6 +205,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setPassword('')
     setRecipes([])
     setDraft(emptyDraft)
+    clearSelectedImage()
     setNotice('')
     setError('')
   }
@@ -177,6 +221,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (ingredientResult.error || stepResult.error) {
       setError(ingredientResult.error?.message ?? stepResult.error?.message ?? 'Рецепт не удалось открыть.')
     } else {
+      clearSelectedImage()
       setDraft({
         id: recipe.id, title: recipe.title, category_id: recipe.category_id ?? '', summary: recipe.summary,
         description: recipe.description, servings: String(recipe.servings), prep_minutes: String(recipe.prep_minutes),
@@ -215,6 +260,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setRecipes((current) => current.filter((item) => item.id !== recipe.id))
     if (draft.id === recipe.id) {
       setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
+      clearSelectedImage()
       setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
       setSteps([''])
     }
@@ -226,6 +272,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   function resetDraft() {
     setAdminView('recipes')
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
+    clearSelectedImage()
     setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
     setSteps([''])
     setNotice('Новый рецепт')
@@ -326,8 +373,25 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (!supabase || !draft.title.trim() || !draft.category_id) return
     setBusy(true)
     setError('')
-    setNotice('Сохраняем…')
+    setNotice(imageFile ? 'Загружаем изображение и сохраняем…' : 'Сохраняем…')
     const slug = makeSlug(draft.title) || `recipe-${Date.now()}`
+    let imageUrlToSave = draft.image_url.trim() || null
+    let uploadedImagePath: string | null = null
+
+    if (imageFile) {
+      const extension = recipeImageTypes[imageFile.type]
+      uploadedImagePath = `recipes/${crypto.randomUUID()}.${extension}`
+      const { error: uploadError } = await supabase.storage
+        .from(RECIPE_IMAGE_BUCKET)
+        .upload(uploadedImagePath, imageFile, { contentType: imageFile.type, cacheControl: '3600', upsert: false })
+      if (uploadError) {
+        setError(`Фото не удалось загрузить. Проверьте, что bucket «${RECIPE_IMAGE_BUCKET}» создан, а SQL-правила включены. ${uploadError.message}`)
+        setBusy(false)
+        return
+      }
+      imageUrlToSave = supabase.storage.from(RECIPE_IMAGE_BUCKET).getPublicUrl(uploadedImagePath).data.publicUrl
+    }
+
     const payload = {
       category_id: draft.category_id,
       slug,
@@ -337,7 +401,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
       servings: Number(draft.servings) || 4,
       prep_minutes: Number(draft.prep_minutes) || 0,
       cook_minutes: Number(draft.cook_minutes) || 0,
-      image_url: draft.image_url.trim() || null,
+      image_url: imageUrlToSave,
       youtube_url: draft.youtube_url.trim() || null,
       is_published: draft.is_published,
       published_at: draft.is_published ? new Date().toISOString() : null,
@@ -348,6 +412,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (recipeId) {
       const { error: updateError } = await supabase.from('recipes').update(payload).eq('id', recipeId)
       if (updateError) {
+        if (uploadedImagePath) await supabase.storage.from(RECIPE_IMAGE_BUCKET).remove([uploadedImagePath])
         setError(updateError.message)
         setBusy(false)
         return
@@ -355,6 +420,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     } else {
       const { data, error: insertError } = await supabase.from('recipes').insert(payload).select('id').single()
       if (insertError || !data) {
+        if (uploadedImagePath) await supabase.storage.from(RECIPE_IMAGE_BUCKET).remove([uploadedImagePath])
         setError(insertError?.message ?? 'Рецепт не удалось создать.')
         setBusy(false)
         return
@@ -381,6 +447,8 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
       : { error: null }
 
     if (clearIngredientsError || ingredientsError || clearStepsError || stepsError) {
+      setDraft((current) => ({ ...current, id: recipeId, image_url: imageUrlToSave ?? '' }))
+      if (uploadedImagePath) clearSelectedImage()
       setError(clearIngredientsError?.message ?? ingredientsError?.message ?? clearStepsError?.message ?? stepsError?.message ?? 'Rezeptdetails konnten nicht gespeichert werden.')
       setBusy(false)
       return
@@ -390,6 +458,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (refreshError) setError(refreshError.message)
     else setRecipes((refreshed ?? []) as RecipeRow[])
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
+    clearSelectedImage()
     setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
     setSteps([''])
     setNotice(payload.is_published ? 'Рецепт опубликован.' : 'Черновик сохранён.')
@@ -422,7 +491,25 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
               <label>Категория<select value={draft.category_id} onChange={(event) => setDraft({ ...draft, category_id: event.target.value })} required><option value="" disabled>Выберите категорию</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
               <label>Краткое описание<input value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} /></label>
               <label>Описание<textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /></label>
-              <label>Ссылка на фото<input type="url" value={draft.image_url} onChange={(event) => setDraft({ ...draft, image_url: event.target.value })} placeholder="https://…" /></label>
+              <div className="admin-image-field">
+                <span className="admin-image-label">Фотография рецепта</span>
+                <div className="admin-image-controls">
+                  <div className="admin-image-preview">{imagePreview || draft.image_url
+                    ? <img src={imagePreview || draft.image_url} alt="Предварительный просмотр фото рецепта" />
+                    : <span>Предпросмотр появится после выбора файла</span>}
+                  </div>
+                  <div className="admin-image-actions">
+                    <label className="admin-image-picker">
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={selectRecipeImage} aria-label="Выбрать фото рецепта" />
+                      <span>{imageFile ? 'Выбрать другое фото' : 'Выбрать фото'}</span>
+                    </label>
+                    {imageFile && <button type="button" className="admin-secondary" onClick={clearSelectedImage}>Отменить выбор</button>}
+                    {draft.image_url && <button type="button" className="admin-secondary" onClick={() => { setDraft((current) => ({ ...current, image_url: '' })); clearSelectedImage() }}>Удалить фото</button>}
+                    <small className="admin-muted">JPG, PNG или WebP · до 5 МБ</small>
+                  </div>
+                </div>
+                <label>Или ссылка на фото<input type="url" value={draft.image_url} onChange={(event) => setDraft({ ...draft, image_url: event.target.value })} placeholder="https://…" /></label>
+              </div>
               <label>YouTube<input type="url" value={draft.youtube_url} onChange={(event) => setDraft({ ...draft, youtube_url: event.target.value })} placeholder="https://youtube.com/…" /></label>
               <fieldset className="admin-rows"><legend>Ингредиенты</legend>{ingredients.map((item, index) => <div className="ingredient-row" key={index}><input aria-label="Название ингредиента" placeholder="Продукт" value={item.name} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, name: event.target.value } : row))} /><input type="number" min="0" step="0.001" aria-label="Количество" placeholder="Кол-во" value={item.quantity} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, quantity: event.target.value } : row))} /><select aria-label="Единица измерения" value={item.unit} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, unit: event.target.value } : row))}><option value="">Ед. изм.</option>{item.unit && !ingredientUnits.some((unit) => unit === item.unit) && <option value={item.unit}>{item.unit}</option>}{ingredientUnits.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select><input aria-label="Примечание к ингредиенту" placeholder="Примечание" value={item.note} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, note: event.target.value } : row))} /><button type="button" className="admin-delete" aria-label="Убрать ингредиент" onClick={() => setIngredients((current) => current.length > 1 ? current.filter((_, rowIndex) => rowIndex !== index) : [{ name: '', quantity: '', unit: '', note: '' }])}>×</button></div>)}<button type="button" className="admin-add-row" onClick={() => setIngredients((current) => [...current, { name: '', quantity: '', unit: '', note: '' }])}>+ Добавить ингредиент</button></fieldset>
               <fieldset className="admin-rows"><legend>Шаги приготовления</legend>{steps.map((step, index) => <div className="step-row" key={index}><span>{index + 1}</span><textarea aria-label={`Шаг ${index + 1}`} rows={2} value={step} onChange={(event) => setSteps((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /><button type="button" className="admin-delete" aria-label="Убрать шаг" onClick={() => setSteps((current) => current.length > 1 ? current.filter((_, itemIndex) => itemIndex !== index) : [''])}>×</button></div>)}<button type="button" className="admin-add-row" onClick={() => setSteps((current) => [...current, ''])}>+ Добавить шаг</button></fieldset>
