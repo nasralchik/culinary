@@ -588,6 +588,18 @@ main { position: relative; z-index: 1; }
 .admin-delete { padding: 0 9px; border: 0; background: transparent; color: #9a4939; font: 22px var(--font-ui); cursor: pointer; }
 .recipe-form { min-width: 0; display: grid; gap: 12px; }
 .recipe-form h3 { margin-bottom: 0; }
+.admin-image-field { display: grid; gap: 8px; }
+.admin-image-label { color: #5d4a31; font: 600 14px/1.4 var(--font-ui); }
+.admin-image-controls { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 14px; align-items: center; }
+.admin-image-preview { display: grid; min-height: 132px; aspect-ratio: 4 / 3; place-items: center; overflow: hidden; border: 1px solid #ae9365; background: rgba(245,236,217,.72); color: #88724e; font: 12px/1.5 var(--font-ui); text-align: center; }
+.admin-image-preview img { display: block; width: 100%; height: 100%; max-height: 220px; object-fit: cover; }
+.admin-image-preview > span { padding: 12px; }
+.admin-image-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-image-picker { position: relative; display: inline-flex !important; width: auto; min-height: 38px; align-items: center; justify-content: center; padding: 8px 12px; border: 1px solid #80623a; background: linear-gradient(#f1e5c9, #dfc99e); color: #4d3b26 !important; font: 600 13px/1.3 var(--font-ui) !important; cursor: pointer; }
+.admin-image-picker:hover { background: #f5e9cb; }
+.admin-image-picker input[type=file] { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
+.admin-image-picker:focus-within { outline: 2px solid #49624a; outline-offset: 2px; }
+.admin-image-actions .admin-muted { flex-basis: 100%; }
 .admin-field-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .admin-rows { min-width: 0; padding: 12px; border: 1px solid rgba(128,98,58,.48); }
 .admin-rows legend { padding: 0 6px; color: #725735; font: 700 14px var(--font-serif); }
@@ -630,6 +642,7 @@ main { position: relative; z-index: 1; }
   .book-subtitle { font-size: 9px; }
   .admin-content { grid-template-columns: 1fr; gap: 12px; }
   .admin-recipe-list { max-height: 190px; overflow: auto; border-bottom: 1px solid #b89b67; padding-bottom: 10px; }
+  .admin-image-controls { grid-template-columns: minmax(120px, 180px) minmax(0, 1fr); }
 }
 @media (max-width: 520px) {
   .library-section { width: calc(100% - 20px); padding-top: 14px; }
@@ -690,6 +703,8 @@ main { position: relative; z-index: 1; }
   .admin-field-grid { gap: 6px; }
   .ingredient-row { grid-template-columns: minmax(80px, 1.4fr) minmax(58px, .7fr) minmax(45px, .5fr) 26px; }
   .ingredient-row input[aria-label='Примечание к ингредиенту'] { display: none; }
+  .admin-image-controls { grid-template-columns: minmax(0, 1fr); }
+  .admin-image-preview { width: min(100%, 260px); min-height: 110px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
