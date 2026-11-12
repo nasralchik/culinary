@@ -12,9 +12,22 @@ interface SearchBarProps {
   suggestions: readonly SearchSuggestion[]
   onChange: (value: string) => void
   onSelect: (recipeId: string) => void
+  placeholder?: string
+  ariaLabel?: string
+  idPrefix?: string
+  className?: string
 }
 
-export function SearchBar({ value, suggestions, onChange, onSelect }: SearchBarProps) {
+export function SearchBar({
+  value,
+  suggestions,
+  onChange,
+  onSelect,
+  placeholder = 'Найдите рецепт или любимое блюдо…',
+  ariaLabel = 'Поиск рецептов',
+  idPrefix = 'recipe-search',
+  className = '',
+}: SearchBarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const hasQuery = value.trim().length > 0
@@ -49,7 +62,7 @@ export function SearchBar({ value, suggestions, onChange, onSelect }: SearchBarP
   }
 
   return (
-    <div className="search-control" onBlur={(event) => {
+    <div className={`search-control ${className}`.trim()} onBlur={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsOpen(false)
     }}>
       <label className="search-box">
@@ -64,21 +77,21 @@ export function SearchBar({ value, suggestions, onChange, onSelect }: SearchBarP
           }}
           onFocus={() => { if (hasQuery) setIsOpen(true) }}
           onKeyDown={handleKeyDown}
-          placeholder="Найдите рецепт или любимое блюдо…"
-          aria-label="Поиск рецептов"
+          placeholder={placeholder}
+          aria-label={ariaLabel}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={showSuggestions}
-          aria-controls="recipe-search-suggestions"
-          aria-activedescendant={showSuggestions && activeIndex >= 0 && suggestions[activeIndex] ? `recipe-suggestion-${suggestions[activeIndex].id}` : undefined}
+          aria-controls={`${idPrefix}-suggestions`}
+          aria-activedescendant={showSuggestions && activeIndex >= 0 && suggestions[activeIndex] ? `${idPrefix}-suggestion-${suggestions[activeIndex].id}` : undefined}
         />
       </label>
 
-      {showSuggestions && <div className="search-suggestions" id="recipe-search-suggestions" role="listbox" aria-label="Подходящие рецепты">
+      {showSuggestions && <div className="search-suggestions" id={`${idPrefix}-suggestions`} role="listbox" aria-label="Подходящие рецепты">
         {suggestions.map((suggestion, index) => (
           <button
             className={`search-suggestion ${index === activeIndex ? 'active' : ''}`}
-            id={`recipe-suggestion-${suggestion.id}`}
+            id={`${idPrefix}-suggestion-${suggestion.id}`}
             key={suggestion.id}
             type="button"
             role="option"

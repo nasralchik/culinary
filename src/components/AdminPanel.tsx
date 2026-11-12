@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { ALL_RECIPES_LABEL } from '../data/books'
+import { SearchBar, type SearchSuggestion } from './SearchBar'
 
 interface CategoryRow {
   id: string
@@ -98,6 +99,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [categoryDraft, setCategoryDraft] = useState<CategoryDraft>(emptyCategoryDraft)
   const [adminView, setAdminView] = useState<'recipes' | 'categories'>('recipes')
   const [recipes, setRecipes] = useState<RecipeRow[]>([])
+  const [recipeSearch, setRecipeSearch] = useState('')
   const [draft, setDraft] = useState<RecipeDraft>(emptyDraft)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState('')
@@ -110,6 +112,20 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [notice, setNotice] = useState('')
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim()
   const loginView = Boolean(supabase && adminEmail && !checking && !user)
+  const normalizedRecipeSearch = recipeSearch.trim().toLocaleLowerCase('ru')
+  const filteredRecipes = normalizedRecipeSearch
+    ? recipes.filter((recipe) => {
+      const categoryTitle = categories.find((category) => category.id === recipe.category_id)?.title ?? ''
+      return [recipe.title, recipe.summary, categoryTitle]
+        .some((value) => value.toLocaleLowerCase('ru').includes(normalizedRecipeSearch))
+    })
+    : recipes
+  const recipeSuggestions: SearchSuggestion[] = filteredRecipes.slice(0, 6).map((recipe) => ({
+    id: recipe.id,
+    title: recipe.title,
+    summary: recipe.summary || (recipe.is_published ? 'Опубликован' : 'Черновик'),
+    category: categories.find((category) => category.id === recipe.category_id)?.title ?? 'Без категории',
+  }))
 
   useEffect(() => () => {
     if (imagePreviewRef.current) URL.revokeObjectURL(imagePreviewRef.current)
@@ -284,6 +300,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
 
   function resetDraft() {
     setAdminView('recipes')
+    setRecipeSearch('')
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
     clearSelectedImage()
     setIngredients([{ ...emptyIngredientDraft }])
@@ -503,7 +520,28 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         {supabase && !checking && isAdmin && <>
           <div className="admin-toolbar"><span>Управление библиотекой</span><div className="admin-toolbar-actions"><button className={`admin-secondary${adminView === 'recipes' ? ' is-selected' : ''}`} onClick={() => setAdminView('recipes')}>Рецепты</button><button className={`admin-secondary${adminView === 'categories' ? ' is-selected' : ''}`} onClick={() => setAdminView('categories')}>Категории</button>{adminView === 'recipes' && <button className="admin-secondary" onClick={resetDraft}>Новый рецепт</button>}<button className="admin-secondary" onClick={signOut}>Выйти</button></div></div>
           {adminView === 'recipes' ? <div className="admin-content">
-            <aside className="admin-recipe-list"><h3>Рецепты ({recipes.length})</h3>{recipes.length === 0 && <p className="admin-muted">Пока рецептов нет.</p>}{recipes.map((recipe) => <div className="admin-recipe-row" key={recipe.id}><button onClick={() => void editRecipe(recipe)} disabled={busy}><strong>{recipe.title}</strong><small>{recipe.is_published ? 'Опубликован' : 'Черновик'}</small></button><button type="button" className="admin-delete admin-category-delete" aria-label={`Удалить рецепт ${recipe.title}`} title="Удалить рецепт" onClick={() => void deleteRecipe(recipe)} disabled={busy}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg></button></div>)}</aside>
+            <aside className="admin-recipe-list">
+              <h3>Рецепты ({normalizedRecipeSearch ? `${filteredRecipes.length} из ${recipes.length}` : recipes.length})</h3>
+              {recipes.length > 0 && <div className="admin-recipe-search">
+                <SearchBar
+                  value={recipeSearch}
+                  suggestions={recipeSuggestions}
+                  onChange={setRecipeSearch}
+                  onSelect={(recipeId) => {
+                    const selectedRecipe = recipes.find((recipe) => recipe.id === recipeId)
+                    if (selectedRecipe) void editRecipe(selectedRecipe)
+                  }}
+                  placeholder="Найти рецепт…"
+                  ariaLabel="Поиск рецептов в панели администратора"
+                  idPrefix="admin-recipe-search"
+                />
+                {normalizedRecipeSearch && filteredRecipes.length === 0 && <p className="admin-muted admin-search-empty">Рецепты не найдены.</p>}
+              </div>}
+              <div className="admin-recipe-results">
+                {recipes.length === 0 && <p className="admin-muted">Пока рецептов нет.</p>}
+                {filteredRecipes.map((recipe) => <div className="admin-recipe-row" key={recipe.id}><button onClick={() => void editRecipe(recipe)} disabled={busy}><strong>{recipe.title}</strong><small>{recipe.is_published ? 'Опубликован' : 'Черновик'}</small></button><button type="button" className="admin-delete admin-category-delete" aria-label={`Удалить рецепт ${recipe.title}`} title="Удалить рецепт" onClick={() => void deleteRecipe(recipe)} disabled={busy}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3" /></svg></button></div>)}
+              </div>
+            </aside>
             <form className="recipe-form" onSubmit={saveRecipe}>
               <h3>{draft.id ? 'Редактировать рецепт' : 'Новый рецепт'}</h3>
               <label>Название<input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} required /></label>
