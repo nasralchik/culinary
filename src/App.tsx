@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ALL_RECIPES_LABEL, recipeCoverPalettes } from './data/books'
-import { getPublishedLibrary, getRecipeDetails, type PublicRecipe, type RecipeIngredient, type RecipeStep } from './data/recipeRepository'
+import { getPublishedLibrary, getRecipeDetails, type PublicRecipe, type RecipeIngredient, type RecipeSection } from './data/recipeRepository'
 import { AdminPanel } from './components/AdminPanel'
 import { Bookshelf } from './components/Bookshelf'
 import { CategoryFilter } from './components/CategoryFilter'
@@ -53,8 +53,7 @@ function App() {
   const [recipes, setRecipes] = useState<PublicRecipe[]>([])
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(initialRecipeId)
   const [sharedRecipeId, setSharedRecipeId] = useState<string | null>(initialRecipeId)
-  const [ingredients, setIngredients] = useState<RecipeIngredient[]>([])
-  const [steps, setSteps] = useState<RecipeStep[]>([])
+  const [recipeSections, setRecipeSections] = useState<RecipeSection[]>([])
   const [scaleIngredientId, setScaleIngredientId] = useState('')
   const [scaleTarget, setScaleTarget] = useState('')
   const [scaleAdjusted, setScaleAdjusted] = useState(false)
@@ -90,8 +89,7 @@ function App() {
   useEffect(() => {
     if (!selectedRecipeId) return
     let active = true
-    setIngredients([])
-    setSteps([])
+    setRecipeSections([])
     setScaleIngredientId('')
     setScaleTarget('')
     setScaleAdjusted(false)
@@ -104,9 +102,8 @@ function App() {
     getRecipeDetails(selectedRecipeId)
       .then((details) => {
         if (active) {
-          setIngredients(details.ingredients)
-          setSteps(details.steps)
-          const firstScalable = details.ingredients.find((ingredient) => ingredient.quantity != null && ingredient.quantity >= 0.01)
+          setRecipeSections(details.sections)
+          const firstScalable = details.sections.flatMap((section) => section.ingredients).find((ingredient) => ingredient.quantity != null && ingredient.quantity >= 0.01)
           setScaleIngredientId(firstScalable?.id ?? '')
           setScaleTarget(firstScalable?.quantity == null ? '' : String(roundDownToTwo(firstScalable.quantity)))
           setScaleAdjusted(false)
@@ -155,6 +152,7 @@ function App() {
   }), [filteredRecipes, recipes])
 
   const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) ?? null
+  const ingredients = recipeSections.flatMap((section) => section.ingredients)
   const scalableIngredients = ingredients.filter((ingredient) => ingredient.quantity != null && ingredient.quantity >= 0.01)
   const selectedScaleIngredient = scalableIngredients.find((ingredient) => ingredient.id === scaleIngredientId) ?? scalableIngredients[0]
   const requestedScaleQuantity = Number(scaleTarget)
@@ -187,11 +185,14 @@ function App() {
       const { downloadRecipePdfFile } = await import('./utils/recipePdf')
       await downloadRecipePdfFile({
         recipe: selectedRecipe,
-        ingredients: ingredients.map((ingredient) => ({
-          name: ingredient.name,
-          amount: formatIngredientAmount(ingredient, scaleFactor),
+        sections: recipeSections.map((section) => ({
+          title: section.title,
+          ingredients: section.ingredients.map((ingredient) => ({
+            name: ingredient.name,
+            amount: formatIngredientAmount(ingredient, scaleFactor),
+          })),
+          steps: section.steps.map((step) => step.instruction),
         })),
-        steps: steps.map((step) => step.instruction),
       })
     } catch (error) {
       console.error('PDF creation failed:', error)
@@ -255,9 +256,9 @@ function App() {
         </section>
       </main>}
       {sharedRecipeId && (selectedRecipe
-        ? <RecipeView recipe={selectedRecipe} ingredients={ingredients} steps={steps} loadingDetails={loadingDetails} recipeError={recipeError} pdfError={pdfError} creatingPdf={creatingPdf} scaleIngredientId={scaleIngredientId} scaleTarget={scaleTarget} scaleFactor={scaleFactor} showScaler={showScaler} shareUrl={shareUrl} shareNotice={shareNotice} standalone onClose={closeRecipe} onDownloadPdf={() => void downloadRecipePdf()} onToggleScaler={() => setShowScaler((visible) => !visible)} onSelectScaleIngredient={changeScaleIngredient} onScaleTargetChange={(value) => { setScaleTarget(value); setScaleAdjusted(true) }} onResetScale={resetScale} onShare={() => void shareRecipe()} formatAmount={formatIngredientAmount} />
+        ? <RecipeView recipe={selectedRecipe} sections={recipeSections} loadingDetails={loadingDetails} recipeError={recipeError} pdfError={pdfError} creatingPdf={creatingPdf} scaleIngredientId={scaleIngredientId} scaleTarget={scaleTarget} scaleFactor={scaleFactor} showScaler={showScaler} shareUrl={shareUrl} shareNotice={shareNotice} standalone onClose={closeRecipe} onDownloadPdf={() => void downloadRecipePdf()} onToggleScaler={() => setShowScaler((visible) => !visible)} onSelectScaleIngredient={changeScaleIngredient} onScaleTargetChange={(value) => { setScaleTarget(value); setScaleAdjusted(true) }} onResetScale={resetScale} onShare={() => void shareRecipe()} formatAmount={formatIngredientAmount} />
         : <main className="shared-recipe-page"><section className="shared-recipe-card shared-recipe-status"><p className="recipe-empty" role={loadingLibrary ? 'status' : 'alert'}>{loadingLibrary ? 'Загружаем рецепт…' : libraryError || 'Рецепт не найден или больше не опубликован.'}</p><button type="button" className="shared-recipe-back" onClick={closeRecipe}>← К библиотеке</button></section></main>)}
-      {!sharedRecipeId && selectedRecipe && <RecipeView recipe={selectedRecipe} ingredients={ingredients} steps={steps} loadingDetails={loadingDetails} recipeError={recipeError} pdfError={pdfError} creatingPdf={creatingPdf} scaleIngredientId={scaleIngredientId} scaleTarget={scaleTarget} scaleFactor={scaleFactor} showScaler={showScaler} shareUrl={shareUrl} shareNotice={shareNotice} onClose={closeRecipe} onDownloadPdf={() => void downloadRecipePdf()} onToggleScaler={() => setShowScaler((visible) => !visible)} onSelectScaleIngredient={changeScaleIngredient} onScaleTargetChange={(value) => { setScaleTarget(value); setScaleAdjusted(true) }} onResetScale={resetScale} onShare={() => void shareRecipe()} formatAmount={formatIngredientAmount} />}
+      {!sharedRecipeId && selectedRecipe && <RecipeView recipe={selectedRecipe} sections={recipeSections} loadingDetails={loadingDetails} recipeError={recipeError} pdfError={pdfError} creatingPdf={creatingPdf} scaleIngredientId={scaleIngredientId} scaleTarget={scaleTarget} scaleFactor={scaleFactor} showScaler={showScaler} shareUrl={shareUrl} shareNotice={shareNotice} onClose={closeRecipe} onDownloadPdf={() => void downloadRecipePdf()} onToggleScaler={() => setShowScaler((visible) => !visible)} onSelectScaleIngredient={changeScaleIngredient} onScaleTargetChange={(value) => { setScaleTarget(value); setScaleAdjusted(true) }} onResetScale={resetScale} onShare={() => void shareRecipe()} formatAmount={formatIngredientAmount} />}
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} onRecipesChanged={() => { void refreshRecipes() }} />}
       <PwaInstallPrompt />
     </div>
