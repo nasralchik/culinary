@@ -20,6 +20,9 @@ export interface RecipeIngredient {
   quantity: number | null
   unit: string
   note: string
+  alternative_name: string
+  alternative_quantity: number | null
+  alternative_unit: string
 }
 
 export interface RecipeStep {
@@ -66,7 +69,7 @@ export async function getRecipeDetails(recipeId: string): Promise<{ ingredients:
   if (!supabase) return { ingredients: [], steps: [] }
 
   const [ingredientResult, stepResult] = await Promise.all([
-    supabase.from('recipe_ingredients').select('id,name,quantity,unit,note').eq('recipe_id', recipeId).order('sort_order'),
+    supabase.from('recipe_ingredients').select('id,name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit').eq('recipe_id', recipeId).order('sort_order'),
     supabase.from('recipe_steps').select('id,step_number,instruction').eq('recipe_id', recipeId).order('step_number'),
   ])
   if (ingredientResult.error) throw ingredientResult.error
