@@ -6,6 +6,7 @@ import { Bookshelf } from './components/Bookshelf'
 import { CategoryFilter } from './components/CategoryFilter'
 import { RecipeView } from './components/RecipeView'
 import { SearchBar } from './components/SearchBar'
+import { PwaInstallPrompt } from './components/PwaInstallPrompt'
 import type { RecipeBook, RecipeCategory } from './types/recipe'
 
 function isValidIngredientUnit(unit: string) {
@@ -225,6 +226,7 @@ function App() {
         : <main className="shared-recipe-page"><section className="shared-recipe-card shared-recipe-status"><p className="recipe-empty" role={loadingLibrary ? 'status' : 'alert'}>{loadingLibrary ? 'Загружаем рецепт…' : libraryError || 'Рецепт не найден или больше не опубликован.'}</p><button type="button" className="shared-recipe-back" onClick={closeRecipe}>← К библиотеке</button></section></main>)}
       {!sharedRecipeId && selectedRecipe && <RecipeView recipe={selectedRecipe} ingredients={ingredients} steps={steps} loadingDetails={loadingDetails} recipeError={recipeError} pdfError={pdfError} creatingPdf={creatingPdf} scaleIngredientId={scaleIngredientId} scaleTarget={scaleTarget} scaleFactor={scaleFactor} showScaler={showScaler} shareUrl={shareUrl} shareNotice={shareNotice} onClose={closeRecipe} onDownloadPdf={() => void downloadRecipePdf()} onToggleScaler={() => setShowScaler((visible) => !visible)} onSelectScaleIngredient={changeScaleIngredient} onScaleTargetChange={(value) => { setScaleTarget(value); setScaleAdjusted(true) }} onResetScale={resetScale} onShare={() => void shareRecipe()} formatAmount={formatIngredientAmount} />}
       {showAdmin && <AdminPanel onClose={() => setShowAdmin(false)} onRecipesChanged={() => { void refreshRecipes() }} />}
+      <PwaInstallPrompt />
     </div>
   )
 }
