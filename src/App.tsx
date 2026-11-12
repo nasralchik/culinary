@@ -31,6 +31,15 @@ function formatIngredientAmount(ingredient: RecipeIngredient, multiplier = 1) {
     parts.push(unit)
   }
 
+  if (ingredient.alternative_name.trim()) {
+    const alternativeUnit = isValidIngredientUnit(ingredient.alternative_unit) ? ingredient.alternative_unit.trim() : ''
+    const alternativeQuantity = ingredient.alternative_quantity == null
+      ? ''
+      : roundDownToTwo(ingredient.alternative_quantity * multiplier).toLocaleString('ru-RU', { maximumFractionDigits: 2 })
+    const alternativeAmount = [alternativeQuantity, alternativeUnit].filter(Boolean).join(' ')
+    parts.push(`или ${ingredient.alternative_name.trim()}${alternativeAmount ? ` — ${alternativeAmount}` : ''}`)
+  }
+
   if (ingredient.note.trim()) parts.push(ingredient.note.trim())
   return parts.join(' · ') || 'Количество не указано'
 }
