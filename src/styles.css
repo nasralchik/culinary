@@ -543,6 +543,9 @@ main { position: relative; z-index: 1; }
 .recipe-description { color: #4d4030; font: 15px/1.75 var(--font-ui); white-space: pre-line; }
 .recipe-detail-section { margin-top: 22px; }
 .recipe-detail-section h3 { margin: 0 0 10px; color: #304338; font: 700 23px/1.25 var(--font-serif); }
+.recipe-detail-section h4 { margin: 16px 0 7px; color: #725735; font: 700 16px/1.35 var(--font-serif); }
+.recipe-named-section h3 { margin-bottom: 12px; }
+.recipe-named-section h4:first-of-type { margin-top: 0; }
 .recipe-detail-section ul, .recipe-detail-section ol { margin: 0; padding-left: 22px; color: #50432f; font: 15px/1.7 var(--font-ui); }
 .recipe-detail-section ul { padding: 0; list-style: none; }
 .recipe-detail-section ul li { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px dotted #b69a67; }
@@ -645,6 +648,14 @@ main { position: relative; z-index: 1; }
 .admin-field-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .admin-rows { min-width: 0; padding: 12px; border: 1px solid rgba(128,98,58,.48); }
 .admin-rows legend { padding: 0 6px; color: #725735; font: 700 14px var(--font-serif); }
+.admin-recipe-section { display: grid; gap: 12px; padding: 12px; background: rgba(255,255,255,.12); }
+.admin-recipe-section > legend { font-size: 17px; }
+.recipe-section-title-row { display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 8px; align-items: end; }
+.recipe-section-title-row .admin-delete { width: 36px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(154,73,57,.32); background: rgba(255,255,255,.18); }
+.recipe-section-title-row .admin-delete:hover { background: rgba(154,73,57,.12); }
+.recipe-section-rows { display: grid; gap: 8px; margin: 0; background: rgba(255,255,255,.13); }
+.recipe-section-rows > legend { font-size: 13px; }
+.admin-add-section { border-color: #49624a; color: #304338; }
 .ingredient-row { display: grid; grid-template-columns: minmax(110px, 1.7fr) minmax(72px, .7fr) minmax(65px, .55fr) minmax(100px, 1fr) 26px; gap: 6px; margin-bottom: 7px; }
 .ingredient-row input, .ingredient-row select { padding: 7px !important; font-size: 13px !important; }
 .ingredient-editor { margin-bottom: 10px; }
