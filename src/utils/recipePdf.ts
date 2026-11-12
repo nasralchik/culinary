@@ -6,8 +6,11 @@ pdfMake.addVirtualFileSystem(pdfFonts)
 
 interface RecipePdfData {
   recipe: PublicRecipe
-  ingredients: Array<{ name: string; amount: string }>
-  steps: string[]
+  sections: Array<{
+    title: string
+    ingredients: Array<{ name: string; amount: string }>
+    steps: string[]
+  }>
 }
 
 function safeFileName(title: string) {
@@ -15,7 +18,7 @@ function safeFileName(title: string) {
   return `${cleaned || 'recept'}.pdf`
 }
 
-export async function downloadRecipePdfFile({ recipe, ingredients, steps }: RecipePdfData) {
+export async function downloadRecipePdfFile({ recipe, sections }: RecipePdfData) {
   const content: unknown[] = [
     { text: recipe.category.toLocaleUpperCase('ru-RU'), style: 'category', margin: [0, 0, 0, 10] },
     { text: recipe.title, style: 'title', margin: [0, 0, 0, recipe.summary ? 10 : 22] },
@@ -24,47 +27,52 @@ export async function downloadRecipePdfFile({ recipe, ingredients, steps }: Reci
   if (recipe.summary) content.push({ text: recipe.summary, style: 'subtitle', margin: [0, 0, 0, 23] })
   if (recipe.description.trim()) content.push({ text: recipe.description.trim(), style: 'description', margin: [0, 0, 0, 20] })
 
-  if (ingredients.length) {
-    content.push({ text: 'Ингредиенты', style: 'sectionTitle', margin: [0, 3, 0, 10], keepWithNext: true })
-    content.push({
-      table: {
-        widths: ['*', 'auto'],
-        headerRows: 1,
-        keepWithHeaderRows: 1,
-        dontBreakRows: true,
-        body: [
-          [{ text: 'Продукт', style: 'tableHeader' }, { text: 'Количество', style: 'tableHeader', alignment: 'right' }],
-          ...ingredients.map((ingredient) => [
-            { text: ingredient.name, style: 'tableCell' },
-            { text: ingredient.amount, style: 'tableAmount', alignment: 'right' },
-          ]),
-        ],
-      },
-      layout: {
-        hLineWidth: (index: number) => index === 1 ? 1 : 0.55,
-        hLineColor: (index: number) => index === 1 ? '#B48949' : '#D6C39B',
-        vLineWidth: () => 0,
-        paddingLeft: () => 0,
-        paddingRight: () => 0,
-        paddingTop: (index: number) => index === 0 ? 8 : 9,
-        paddingBottom: (index: number) => index === 0 ? 8 : 9,
-        fillColor: (rowIndex: number) => rowIndex === 0 ? '#EDE0C3' : rowIndex % 2 === 0 ? '#FBF7ED' : '#F5EEDC',
-      },
-    })
-  }
+  sections.filter((section) => section.title.trim() || section.ingredients.length > 0 || section.steps.length > 0).forEach((section) => {
+    const named = section.title.trim().length > 0
+    if (named) content.push({ text: section.title.trim(), style: 'sectionTitle', margin: [0, 22, 0, 9], keepWithNext: true })
 
-  if (steps.length) {
-    content.push({ text: 'Приготовление', style: 'sectionTitle', margin: [0, 25, 0, 10], keepWithNext: true })
-    steps.forEach((instruction, index) => content.push({
-      columns: [
-        { text: `${index + 1}.`, width: 28, style: 'stepNumber' },
-        { text: instruction, style: 'stepText' },
-      ],
-      columnGap: 6,
-      margin: [0, 0, 0, 11],
-      unbreakable: true,
-    }))
-  }
+    if (section.ingredients.length) {
+      content.push({ text: 'Ингредиенты', style: named ? 'subsectionTitle' : 'sectionTitle', margin: [0, named ? 3 : 3, 0, 10], keepWithNext: true })
+      content.push({
+        table: {
+          widths: ['*', 'auto'],
+          headerRows: 1,
+          keepWithHeaderRows: 1,
+          dontBreakRows: true,
+          body: [
+            [{ text: 'Продукт', style: 'tableHeader' }, { text: 'Количество', style: 'tableHeader', alignment: 'right' }],
+            ...section.ingredients.map((ingredient) => [
+              { text: ingredient.name, style: 'tableCell' },
+              { text: ingredient.amount, style: 'tableAmount', alignment: 'right' },
+            ]),
+          ],
+        },
+        layout: {
+          hLineWidth: (index: number) => index === 1 ? 1 : 0.55,
+          hLineColor: (index: number) => index === 1 ? '#B48949' : '#D6C39B',
+          vLineWidth: () => 0,
+          paddingLeft: () => 0,
+          paddingRight: () => 0,
+          paddingTop: (index: number) => index === 0 ? 8 : 9,
+          paddingBottom: (index: number) => index === 0 ? 8 : 9,
+          fillColor: (rowIndex: number) => rowIndex === 0 ? '#EDE0C3' : rowIndex % 2 === 0 ? '#FBF7ED' : '#F5EEDC',
+        },
+      })
+    }
+
+    if (section.steps.length) {
+      content.push({ text: 'Приготовление', style: named ? 'subsectionTitle' : 'sectionTitle', margin: [0, named ? 16 : 25, 0, 10], keepWithNext: true })
+      section.steps.forEach((instruction, index) => content.push({
+        columns: [
+          { text: `${index + 1}.`, width: 28, style: 'stepNumber' },
+          { text: instruction, style: 'stepText' },
+        ],
+        columnGap: 6,
+        margin: [0, 0, 0, 11],
+        unbreakable: true,
+      }))
+    }
+  })
 
   const documentDefinition = {
     info: {
@@ -95,6 +103,7 @@ export async function downloadRecipePdfFile({ recipe, ingredients, steps }: Reci
       subtitle: { fontSize: 13, italics: true, color: '#725C3C', alignment: 'center', lineHeight: 1.35 },
       description: { fontSize: 10.5, color: '#514633', lineHeight: 1.5 },
       sectionTitle: { fontSize: 17, bold: true, color: '#263D30' },
+      subsectionTitle: { fontSize: 12, bold: true, color: '#725735' },
       tableHeader: { fontSize: 9, bold: true, color: '#6B512F' },
       tableCell: { fontSize: 10, color: '#403629' },
       tableAmount: { fontSize: 10, color: '#5C472B' },
