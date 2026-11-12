@@ -31,6 +31,14 @@ export interface RecipeStep {
   instruction: string
 }
 
+export interface RecipeSection {
+  id: string
+  title: string
+  sort_order: number
+  ingredients: RecipeIngredient[]
+  steps: RecipeStep[]
+}
+
 export async function getPublishedRecipeCount(): Promise<number | null> {
   if (!supabase) return null
 
@@ -65,17 +73,31 @@ export async function getPublishedLibrary(): Promise<{ categories: string[]; rec
   return { categories: categoryRows.map((category) => category.title as string), recipes }
 }
 
-export async function getRecipeDetails(recipeId: string): Promise<{ ingredients: RecipeIngredient[]; steps: RecipeStep[] }> {
-  if (!supabase) return { ingredients: [], steps: [] }
+export async function getRecipeDetails(recipeId: string): Promise<{ sections: RecipeSection[] }> {
+  if (!supabase) return { sections: [] }
 
-  const [ingredientResult, stepResult] = await Promise.all([
-    supabase.from('recipe_ingredients').select('id,name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit').eq('recipe_id', recipeId).order('sort_order'),
-    supabase.from('recipe_steps').select('id,step_number,instruction').eq('recipe_id', recipeId).order('step_number'),
+  const [sectionResult, ingredientResult, stepResult] = await Promise.all([
+    supabase.from('recipe_sections').select('id,title,sort_order').eq('recipe_id', recipeId).order('sort_order'),
+    supabase.from('recipe_ingredients').select('id,section_id,name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit,sort_order').eq('recipe_id', recipeId).order('sort_order'),
+    supabase.from('recipe_steps').select('id,section_id,step_number,instruction').eq('recipe_id', recipeId).order('step_number'),
   ])
+  if (sectionResult.error) throw sectionResult.error
   if (ingredientResult.error) throw ingredientResult.error
   if (stepResult.error) throw stepResult.error
-  return {
-    ingredients: (ingredientResult.data ?? []) as RecipeIngredient[],
-    steps: (stepResult.data ?? []) as RecipeStep[],
+
+  const sections: RecipeSection[] = (sectionResult.data ?? []).map((section) => ({
+    id: section.id,
+    title: section.title ?? '',
+    sort_order: section.sort_order,
+    ingredients: [],
+    steps: [],
+  }))
+  const sectionById = new Map(sections.map((section) => [section.id, section]))
+  for (const ingredient of ingredientResult.data ?? []) {
+    sectionById.get(ingredient.section_id)?.ingredients.push(ingredient as RecipeIngredient)
   }
+  for (const step of stepResult.data ?? []) {
+    sectionById.get(step.section_id)?.steps.push(step as RecipeStep)
+  }
+  return { sections }
 }
