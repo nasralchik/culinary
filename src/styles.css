@@ -611,6 +611,12 @@ main { position: relative; z-index: 1; }
 .admin-primary:disabled, .admin-secondary:disabled { opacity: .55; cursor: wait; }
 .admin-content { display: grid; grid-template-columns: minmax(210px, .72fr) minmax(0, 1.6fr); gap: 22px; padding-top: 8px; }
 .admin-recipe-list h3, .recipe-form h3 { margin: 9px 0 12px; color: #304338; font: 700 22px/1.25 var(--font-serif); }
+.admin-recipe-search { margin: 0 0 7px; }
+.admin-recipe-search .search-control { flex: none; }
+.admin-recipe-search .search-box { height: 42px; gap: 8px; padding-inline: 10px; }
+.admin-recipe-search .search-icon { font-size: 23px; }
+.admin-recipe-search .search-box input { font-size: 14px; }
+.admin-search-empty { padding: 9px 4px 3px; }
 .admin-recipe-row { display: flex; align-items: stretch; border-bottom: 1px solid rgba(117,84,45,.22); }
 .admin-recipe-row > button:first-child { flex: 1; min-width: 0; padding: 10px 8px; border: 0; background: transparent; color: #493923; text-align: left; cursor: pointer; }
 .admin-recipe-row > button:first-child:hover { background: rgba(255,247,225,.5); }
@@ -685,7 +691,7 @@ main { position: relative; z-index: 1; }
   .book-title { font-size: clamp(12px, 2vw, 15px); }
   .book-subtitle { font-size: 9px; }
   .admin-content { grid-template-columns: 1fr; gap: 12px; }
-  .admin-recipe-list { max-height: 190px; overflow: auto; border-bottom: 1px solid #b89b67; padding-bottom: 10px; }
+  .admin-recipe-results { max-height: 190px; overflow: auto; border-bottom: 1px solid #b89b67; padding-bottom: 10px; }
   .admin-image-controls { grid-template-columns: minmax(120px, 180px) minmax(0, 1fr); }
 }
 @media (max-width: 520px) {
