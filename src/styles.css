@@ -166,7 +166,7 @@ main { position: relative; z-index: 1; }
   position: relative;
   isolation: isolate;
   --cabinet-inset: 25px;
-  --book-shelf-gap: 16px;
+  --book-shelf-gap: 8px;
   --shelf-plank-height: 23px;
   width: min(1040px, 100%);
   margin: 16px auto 0;
