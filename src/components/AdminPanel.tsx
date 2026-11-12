@@ -36,6 +36,15 @@ interface IngredientDraft {
   quantity: string
   unit: string
   note: string
+  alternative_name: string
+  alternative_quantity: string
+  alternative_unit: string
+  alternative_open: boolean
+}
+
+const emptyIngredientDraft: IngredientDraft = {
+  name: '', quantity: '', unit: '', note: '',
+  alternative_name: '', alternative_quantity: '', alternative_unit: '', alternative_open: false,
 }
 
 interface RecipeDraft {
@@ -93,7 +102,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState('')
   const imagePreviewRef = useRef<string | null>(null)
-  const [ingredients, setIngredients] = useState<IngredientDraft[]>([{ name: '', quantity: '', unit: '', note: '' }])
+  const [ingredients, setIngredients] = useState<IngredientDraft[]>([{ ...emptyIngredientDraft }])
   const [steps, setSteps] = useState<string[]>([''])
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -215,7 +224,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setBusy(true)
     setError('')
     const [ingredientResult, stepResult] = await Promise.all([
-      supabase.from('recipe_ingredients').select('name,quantity,unit,note,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
+        supabase.from('recipe_ingredients').select('name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
       supabase.from('recipe_steps').select('instruction,step_number').eq('recipe_id', recipe.id).order('step_number'),
     ])
     if (ingredientResult.error || stepResult.error) {
@@ -233,8 +242,12 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         quantity: item.quantity == null ? '' : String(item.quantity),
         unit: item.unit && !/^\d+(?:[.,]\d+)?$/.test(item.unit.trim()) ? item.unit : '',
         note: item.note ?? '',
+        alternative_name: item.alternative_name ?? '',
+        alternative_quantity: item.alternative_quantity == null ? '' : String(item.alternative_quantity),
+        alternative_unit: item.alternative_unit && !/^\d+(?:[.,]\d+)?$/.test(item.alternative_unit.trim()) ? item.alternative_unit : '',
+        alternative_open: Boolean(item.alternative_name || item.alternative_quantity != null || item.alternative_unit),
       }))
-      setIngredients(loadedIngredients.length ? loadedIngredients : [{ name: '', quantity: '', unit: '', note: '' }])
+      setIngredients(loadedIngredients.length ? loadedIngredients : [{ ...emptyIngredientDraft }])
       const loadedSteps = (stepResult.data ?? []).map((item) => item.instruction)
       setSteps(loadedSteps.length ? loadedSteps : [''])
       setNotice('Редактирование рецепта')
@@ -261,7 +274,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (draft.id === recipe.id) {
       setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
       clearSelectedImage()
-      setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
+      setIngredients([{ ...emptyIngredientDraft }])
       setSteps([''])
     }
     setNotice('Рецепт удалён.')
@@ -273,7 +286,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setAdminView('recipes')
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
     clearSelectedImage()
-    setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
+    setIngredients([{ ...emptyIngredientDraft }])
     setSteps([''])
     setNotice('Новый рецепт')
     setError('')
@@ -429,14 +442,20 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     }
 
     const { error: clearIngredientsError } = await supabase.from('recipe_ingredients').delete().eq('recipe_id', recipeId)
-    const cleanIngredients = ingredients.filter((item) => item.name.trim()).map((item, index) => ({
-      recipe_id: recipeId,
-      name: item.name.trim(),
-      quantity: item.quantity.trim() ? Number(item.quantity.replace(',', '.')) : null,
-      unit: item.unit.trim(),
-      note: item.note.trim(),
-      sort_order: index,
-    }))
+    const cleanIngredients = ingredients.filter((item) => item.name.trim()).map((item, index) => {
+      const alternativeName = item.alternative_name.trim()
+      return {
+        recipe_id: recipeId,
+        name: item.name.trim(),
+        quantity: item.quantity.trim() ? Number(item.quantity.replace(',', '.')) : null,
+        unit: item.unit.trim(),
+        note: item.note.trim(),
+        alternative_name: alternativeName,
+        alternative_quantity: alternativeName && item.alternative_quantity.trim() ? Number(item.alternative_quantity.replace(',', '.')) : null,
+        alternative_unit: alternativeName ? item.alternative_unit.trim() : '',
+        sort_order: index,
+      }
+    })
     const { error: ingredientsError } = cleanIngredients.length
       ? await supabase.from('recipe_ingredients').insert(cleanIngredients)
       : { error: null }
@@ -459,7 +478,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     else setRecipes((refreshed ?? []) as RecipeRow[])
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
     clearSelectedImage()
-    setIngredients([{ name: '', quantity: '', unit: '', note: '' }])
+    setIngredients([{ ...emptyIngredientDraft }])
     setSteps([''])
     setNotice(payload.is_published ? 'Рецепт опубликован.' : 'Черновик сохранён.')
     onRecipesChanged?.()
@@ -511,7 +530,13 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
                 <label>Или ссылка на фото<input type="url" value={draft.image_url} onChange={(event) => setDraft({ ...draft, image_url: event.target.value })} placeholder="https://…" /></label>
               </div>
               <label>YouTube<input type="url" value={draft.youtube_url} onChange={(event) => setDraft({ ...draft, youtube_url: event.target.value })} placeholder="https://youtube.com/…" /></label>
-              <fieldset className="admin-rows"><legend>Ингредиенты</legend>{ingredients.map((item, index) => <div className="ingredient-row" key={index}><input aria-label="Название ингредиента" placeholder="Продукт" value={item.name} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, name: event.target.value } : row))} /><input type="number" min="0" step="0.001" aria-label="Количество" placeholder="Кол-во" value={item.quantity} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, quantity: event.target.value } : row))} /><select aria-label="Единица измерения" value={item.unit} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, unit: event.target.value } : row))}><option value="">Ед. изм.</option>{item.unit && !ingredientUnits.some((unit) => unit === item.unit) && <option value={item.unit}>{item.unit}</option>}{ingredientUnits.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select><input aria-label="Примечание к ингредиенту" placeholder="Примечание" value={item.note} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, note: event.target.value } : row))} /><button type="button" className="admin-delete" aria-label="Убрать ингредиент" onClick={() => setIngredients((current) => current.length > 1 ? current.filter((_, rowIndex) => rowIndex !== index) : [{ name: '', quantity: '', unit: '', note: '' }])}>×</button></div>)}<button type="button" className="admin-add-row" onClick={() => setIngredients((current) => [...current, { name: '', quantity: '', unit: '', note: '' }])}>+ Добавить ингредиент</button></fieldset>
+              <fieldset className="admin-rows"><legend>Ингредиенты</legend>{ingredients.map((item, index) => <div className="ingredient-editor" key={index}>
+                <div className="ingredient-row"><input aria-label="Название ингредиента" placeholder="Продукт" value={item.name} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, name: event.target.value } : row))} /><input type="number" min="0" step="0.001" aria-label="Количество" placeholder="Кол-во" value={item.quantity} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, quantity: event.target.value } : row))} /><select aria-label="Единица измерения" value={item.unit} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, unit: event.target.value } : row))}><option value="">Ед. изм.</option>{item.unit && !ingredientUnits.some((unit) => unit === item.unit) && <option value={item.unit}>{item.unit}</option>}{ingredientUnits.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select><input aria-label="Примечание к ингредиенту" placeholder="Примечание (например, Тип 405)" value={item.note} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, note: event.target.value } : row))} /><button type="button" className="admin-delete" aria-label="Убрать ингредиент" onClick={() => setIngredients((current) => current.length > 1 ? current.filter((_, rowIndex) => rowIndex !== index) : [{ ...emptyIngredientDraft }])}>×</button></div>
+                {item.alternative_open ? <div className="ingredient-alternative">
+                  <p>Замена · количество будет пересчитано вместе с рецептом</p>
+                  <div className="ingredient-alternative-row"><input aria-label="Название заменяющего ингредиента" placeholder="Например, сода" value={item.alternative_name} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_name: event.target.value } : row))} /><input type="number" min="0" step="0.01" aria-label="Количество заменяющего ингредиента" placeholder="Кол-во" value={item.alternative_quantity} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_quantity: event.target.value } : row))} /><select aria-label="Единица измерения замены" value={item.alternative_unit} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_unit: event.target.value } : row))}><option value="">Ед. изм.</option>{item.alternative_unit && !ingredientUnits.some((unit) => unit === item.alternative_unit) && <option value={item.alternative_unit}>{item.alternative_unit}</option>}{ingredientUnits.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select><button type="button" className="admin-delete" aria-label="Убрать замену" onClick={() => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_name: '', alternative_quantity: '', alternative_unit: '', alternative_open: false } : row))}>×</button></div>
+                </div> : <button type="button" className="ingredient-alternative-toggle" onClick={() => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_open: true } : row))}>+ Добавить замену</button>}
+              </div>)}<button type="button" className="admin-add-row" onClick={() => setIngredients((current) => [...current, { ...emptyIngredientDraft }])}>+ Добавить ингредиент</button></fieldset>
               <fieldset className="admin-rows"><legend>Шаги приготовления</legend>{steps.map((step, index) => <div className="step-row" key={index}><span>{index + 1}</span><textarea aria-label={`Шаг ${index + 1}`} rows={2} value={step} onChange={(event) => setSteps((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /><button type="button" className="admin-delete" aria-label="Убрать шаг" onClick={() => setSteps((current) => current.length > 1 ? current.filter((_, itemIndex) => itemIndex !== index) : [''])}>×</button></div>)}<button type="button" className="admin-add-row" onClick={() => setSteps((current) => [...current, ''])}>+ Добавить шаг</button></fieldset>
               <label className="admin-publish"><input type="checkbox" checked={draft.is_published} onChange={(event) => setDraft({ ...draft, is_published: event.target.checked })} /> Опубликовать рецепт</label>
               {error && <p className="admin-error" role="alert">{error}</p>}{notice && !error && <p className="admin-notice" role="status">{notice}</p>}
