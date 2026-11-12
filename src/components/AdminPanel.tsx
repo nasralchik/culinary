@@ -3,6 +3,7 @@ import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { ALL_RECIPES_LABEL } from '../data/books'
 import { SearchBar, type SearchSuggestion } from './SearchBar'
+import { makeEmptyRecipeSection, RecipeSectionsEditor, type IngredientDraft, type RecipeSectionDraft } from './RecipeSectionsEditor'
 
 interface CategoryRow {
   id: string
@@ -30,22 +31,6 @@ interface RecipeRow {
   image_url: string | null
   youtube_url: string | null
   is_published: boolean
-}
-
-interface IngredientDraft {
-  name: string
-  quantity: string
-  unit: string
-  note: string
-  alternative_name: string
-  alternative_quantity: string
-  alternative_unit: string
-  alternative_open: boolean
-}
-
-const emptyIngredientDraft: IngredientDraft = {
-  name: '', quantity: '', unit: '', note: '',
-  alternative_name: '', alternative_quantity: '', alternative_unit: '', alternative_open: false,
 }
 
 interface RecipeDraft {
@@ -77,11 +62,6 @@ const recipeImageTypes: Record<string, string> = {
   'image/webp': 'webp',
 }
 
-const ingredientUnits = [
-  'г', 'кг', 'мл', 'л', 'ч. л.', 'ст. л.', 'шт.', 'стакан', 'чашка',
-  'щепотка', 'зубчик', 'пучок', 'ломтик', 'головка', 'упаковка', 'банка', 'по вкусу',
-]
-
 const transliteration: Record<string, string> = {
   а:'a', б:'b', в:'v', г:'g', д:'d', е:'e', ё:'yo', ж:'zh', з:'z', и:'i', й:'y', к:'k', л:'l', м:'m', н:'n', о:'o', п:'p', р:'r', с:'s', т:'t', у:'u', ф:'f', х:'kh', ц:'ts', ч:'ch', ш:'sh', щ:'shch', ы:'y', э:'e', ю:'yu', я:'ya', ъ:'', ь:'',
 }
@@ -104,8 +84,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState('')
   const imagePreviewRef = useRef<string | null>(null)
-  const [ingredients, setIngredients] = useState<IngredientDraft[]>([{ ...emptyIngredientDraft }])
-  const [steps, setSteps] = useState<string[]>([''])
+  const [sections, setSections] = useState<RecipeSectionDraft[]>([makeEmptyRecipeSection()])
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -239,12 +218,13 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (!supabase) return
     setBusy(true)
     setError('')
-    const [ingredientResult, stepResult] = await Promise.all([
-        supabase.from('recipe_ingredients').select('name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
-      supabase.from('recipe_steps').select('instruction,step_number').eq('recipe_id', recipe.id).order('step_number'),
+    const [sectionResult, ingredientResult, stepResult] = await Promise.all([
+      supabase.from('recipe_sections').select('id,title,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
+      supabase.from('recipe_ingredients').select('section_id,name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
+      supabase.from('recipe_steps').select('section_id,instruction,step_number').eq('recipe_id', recipe.id).order('step_number'),
     ])
-    if (ingredientResult.error || stepResult.error) {
-      setError(ingredientResult.error?.message ?? stepResult.error?.message ?? 'Рецепт не удалось открыть.')
+    if (sectionResult.error || ingredientResult.error || stepResult.error) {
+      setError(sectionResult.error?.message ?? ingredientResult.error?.message ?? stepResult.error?.message ?? 'Рецепт не удалось открыть.')
     } else {
       clearSelectedImage()
       setDraft({
@@ -253,19 +233,47 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         cook_minutes: String(recipe.cook_minutes), image_url: recipe.image_url ?? '', youtube_url: recipe.youtube_url ?? '',
         is_published: recipe.is_published,
       })
-      const loadedIngredients = (ingredientResult.data ?? []).map((item) => ({
-        name: item.name,
-        quantity: item.quantity == null ? '' : String(item.quantity),
-        unit: item.unit && !/^\d+(?:[.,]\d+)?$/.test(item.unit.trim()) ? item.unit : '',
-        note: item.note ?? '',
-        alternative_name: item.alternative_name ?? '',
-        alternative_quantity: item.alternative_quantity == null ? '' : String(item.alternative_quantity),
-        alternative_unit: item.alternative_unit && !/^\d+(?:[.,]\d+)?$/.test(item.alternative_unit.trim()) ? item.alternative_unit : '',
-        alternative_open: Boolean(item.alternative_name || item.alternative_quantity != null || item.alternative_unit),
+      const loadedSections: RecipeSectionDraft[] = (sectionResult.data ?? []).map((section) => ({
+        ...makeEmptyRecipeSection(section.title ?? ''),
+        id: section.id,
+        title: section.title ?? '',
+        ingredients: (ingredientResult.data ?? []).filter((item) => item.section_id === section.id).map((item): IngredientDraft => ({
+          name: item.name,
+          quantity: item.quantity == null ? '' : String(item.quantity),
+          unit: item.unit && !/^\d+(?:[.,]\d+)?$/.test(item.unit.trim()) ? item.unit : '',
+          note: item.note ?? '',
+          alternative_name: item.alternative_name ?? '',
+          alternative_quantity: item.alternative_quantity == null ? '' : String(item.alternative_quantity),
+          alternative_unit: item.alternative_unit && !/^\d+(?:[.,]\d+)?$/.test(item.alternative_unit.trim()) ? item.alternative_unit : '',
+          alternative_open: Boolean(item.alternative_name || item.alternative_quantity != null || item.alternative_unit),
+        })),
+        steps: (stepResult.data ?? []).filter((item) => item.section_id === section.id).map((item) => item.instruction),
       }))
-      setIngredients(loadedIngredients.length ? loadedIngredients : [{ ...emptyIngredientDraft }])
-      const loadedSteps = (stepResult.data ?? []).map((item) => item.instruction)
-      setSteps(loadedSteps.length ? loadedSteps : [''])
+      const unsectionedIngredients = (ingredientResult.data ?? []).filter((item) => !item.section_id)
+      const unsectionedSteps = (stepResult.data ?? []).filter((item) => !item.section_id)
+      if (unsectionedIngredients.length || unsectionedSteps.length) {
+        const fallbackSection = loadedSections.find((section) => !section.title.trim()) ?? makeEmptyRecipeSection()
+        fallbackSection.ingredients = [
+          ...fallbackSection.ingredients.filter((item) => item.name || item.quantity || item.note),
+          ...unsectionedIngredients.map((item): IngredientDraft => ({
+            name: item.name,
+            quantity: item.quantity == null ? '' : String(item.quantity),
+            unit: item.unit && !/^\d+(?:[.,]\d+)?$/.test(item.unit.trim()) ? item.unit : '',
+            note: item.note ?? '',
+            alternative_name: item.alternative_name ?? '',
+            alternative_quantity: item.alternative_quantity == null ? '' : String(item.alternative_quantity),
+            alternative_unit: item.alternative_unit && !/^\d+(?:[.,]\d+)?$/.test(item.alternative_unit.trim()) ? item.alternative_unit : '',
+            alternative_open: Boolean(item.alternative_name || item.alternative_quantity != null || item.alternative_unit),
+          })),
+        ]
+        fallbackSection.steps = [...fallbackSection.steps.filter(Boolean), ...unsectionedSteps.map((item) => item.instruction)]
+        if (!loadedSections.includes(fallbackSection)) loadedSections.push(fallbackSection)
+      }
+      setSections(loadedSections.length ? loadedSections.map((section) => ({
+        ...section,
+        ingredients: section.ingredients.length ? section.ingredients : [{ name: '', quantity: '', unit: '', note: '', alternative_name: '', alternative_quantity: '', alternative_unit: '', alternative_open: false }],
+        steps: section.steps.length ? section.steps : [''],
+      })) : [makeEmptyRecipeSection()])
       setNotice('Редактирование рецепта')
     }
     setBusy(false)
@@ -290,8 +298,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     if (draft.id === recipe.id) {
       setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
       clearSelectedImage()
-      setIngredients([{ ...emptyIngredientDraft }])
-      setSteps([''])
+      setSections([makeEmptyRecipeSection()])
     }
     setNotice('Рецепт удалён.')
     onRecipesChanged?.()
@@ -303,8 +310,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setRecipeSearch('')
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
     clearSelectedImage()
-    setIngredients([{ ...emptyIngredientDraft }])
-    setSteps([''])
+    setSections([makeEmptyRecipeSection()])
     setNotice('Новый рецепт')
     setError('')
   }
@@ -404,6 +410,17 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setBusy(true)
     setError('')
     setNotice(imageFile ? 'Загружаем изображение и сохраняем…' : 'Сохраняем…')
+
+    let previousSectionIds: string[] = []
+    if (draft.id) {
+      const { data, error: sectionLookupError } = await supabase.from('recipe_sections').select('id').eq('recipe_id', draft.id)
+      if (sectionLookupError) {
+        setError(`Не удалось загрузить разделы рецепта. Проверьте, что SQL-миграция recipe_sections выполнена в Supabase. ${sectionLookupError.message}`)
+        setBusy(false)
+        return
+      }
+      previousSectionIds = (data ?? []).map((section) => section.id)
+    }
     const slug = makeSlug(draft.title) || `recipe-${Date.now()}`
     let imageUrlToSave = draft.image_url.trim() || null
     let uploadedImagePath: string | null = null
@@ -458,36 +475,82 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
       recipeId = data.id
     }
 
-    const { error: clearIngredientsError } = await supabase.from('recipe_ingredients').delete().eq('recipe_id', recipeId)
-    const cleanIngredients = ingredients.filter((item) => item.name.trim()).map((item, index) => {
-      const alternativeName = item.alternative_name.trim()
-      return {
-        recipe_id: recipeId,
-        name: item.name.trim(),
-        quantity: item.quantity.trim() ? Number(item.quantity.replace(',', '.')) : null,
-        unit: item.unit.trim(),
-        note: item.note.trim(),
-        alternative_name: alternativeName,
-        alternative_quantity: alternativeName && item.alternative_quantity.trim() ? Number(item.alternative_quantity.replace(',', '.')) : null,
-        alternative_unit: alternativeName ? item.alternative_unit.trim() : '',
-        sort_order: index,
-      }
-    })
-    const { error: ingredientsError } = cleanIngredients.length
-      ? await supabase.from('recipe_ingredients').insert(cleanIngredients)
-      : { error: null }
-    const { error: clearStepsError } = await supabase.from('recipe_steps').delete().eq('recipe_id', recipeId)
-    const cleanSteps = steps.filter((step) => step.trim()).map((instruction, index) => ({ recipe_id: recipeId, step_number: index + 1, instruction: instruction.trim() }))
-    const { error: stepsError } = cleanSteps.length
-      ? await supabase.from('recipe_steps').insert(cleanSteps)
-      : { error: null }
+    const sectionRows = sections.map((section, index) => ({ recipe_id: recipeId, title: section.title.trim(), sort_order: index }))
+    const { data: createdSections, error: createSectionsError } = await supabase
+      .from('recipe_sections')
+      .insert(sectionRows)
+      .select('id,sort_order')
 
-    if (clearIngredientsError || ingredientsError || clearStepsError || stepsError) {
+    if (createSectionsError || !createdSections) {
       setDraft((current) => ({ ...current, id: recipeId, image_url: imageUrlToSave ?? '' }))
       if (uploadedImagePath) clearSelectedImage()
-      setError(clearIngredientsError?.message ?? ingredientsError?.message ?? clearStepsError?.message ?? stepsError?.message ?? 'Rezeptdetails konnten nicht gespeichert werden.')
+      setError(`Разделы рецепта не удалось сохранить. ${createSectionsError?.message ?? ''}`)
       setBusy(false)
       return
+    }
+
+    const sectionIdByOrder = new Map(createdSections.map((section) => [section.sort_order, section.id]))
+    const cleanIngredients = sections.flatMap((section, sectionIndex) => {
+      const sectionId = sectionIdByOrder.get(sectionIndex)
+      if (!sectionId) return []
+      return section.ingredients.filter((item) => item.name.trim()).map((item, index) => {
+        const alternativeName = item.alternative_name.trim()
+        return {
+          recipe_id: recipeId,
+          section_id: sectionId,
+          name: item.name.trim(),
+          quantity: item.quantity.trim() ? Number(item.quantity.replace(',', '.')) : null,
+          unit: item.unit.trim(),
+          note: item.note.trim(),
+          alternative_name: alternativeName,
+          alternative_quantity: alternativeName && item.alternative_quantity.trim() ? Number(item.alternative_quantity.replace(',', '.')) : null,
+          alternative_unit: alternativeName ? item.alternative_unit.trim() : '',
+          sort_order: index,
+        }
+      })
+    })
+    const cleanSteps = sections.flatMap((section, sectionIndex) => {
+      const sectionId = sectionIdByOrder.get(sectionIndex)
+      if (!sectionId) return []
+      return section.steps.filter((step) => step.trim()).map((instruction, index) => ({
+        recipe_id: recipeId,
+        section_id: sectionId,
+        step_number: index + 1,
+        instruction: instruction.trim(),
+      }))
+    })
+
+    const [{ error: ingredientsError }, { error: stepsError }] = await Promise.all([
+      cleanIngredients.length ? supabase.from('recipe_ingredients').insert(cleanIngredients) : Promise.resolve({ error: null }),
+      cleanSteps.length ? supabase.from('recipe_steps').insert(cleanSteps) : Promise.resolve({ error: null }),
+    ])
+    if (ingredientsError || stepsError) {
+      await supabase.from('recipe_sections').delete().in('id', createdSections.map((section) => section.id))
+      setDraft((current) => ({ ...current, id: recipeId, image_url: imageUrlToSave ?? '' }))
+      if (uploadedImagePath) clearSelectedImage()
+      setError(`Ингредиенты или шаги не удалось сохранить: ${ingredientsError?.message ?? stepsError?.message ?? ''}`)
+      setBusy(false)
+      return
+    }
+
+    if (previousSectionIds.length) {
+      const { error: removePreviousError } = await supabase.from('recipe_sections').delete().in('id', previousSectionIds)
+      if (removePreviousError) {
+        await supabase.from('recipe_sections').delete().in('id', createdSections.map((section) => section.id))
+        setDraft((current) => ({ ...current, id: recipeId, image_url: imageUrlToSave ?? '' }))
+        if (uploadedImagePath) clearSelectedImage()
+        setError(`Новые данные сохранены, но старые разделы не удалось заменить: ${removePreviousError.message}`)
+        setBusy(false)
+        return
+      }
+    }
+
+    const [{ error: orphanIngredientsError }, { error: orphanStepsError }] = await Promise.all([
+      supabase.from('recipe_ingredients').delete().eq('recipe_id', recipeId).is('section_id', null),
+      supabase.from('recipe_steps').delete().eq('recipe_id', recipeId).is('section_id', null),
+    ])
+    if (orphanIngredientsError || orphanStepsError) {
+      setError(`Не удалось убрать старые записи без раздела: ${orphanIngredientsError?.message ?? orphanStepsError?.message ?? ''}`)
     }
 
     const { data: refreshed, error: refreshError } = await supabase.from('recipes').select('id,title,slug,category_id,summary,description,servings,prep_minutes,cook_minutes,image_url,youtube_url,is_published').order('created_at', { ascending: false })
@@ -495,8 +558,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     else setRecipes((refreshed ?? []) as RecipeRow[])
     setDraft({ ...emptyDraft, category_id: categories[0]?.id ?? '' })
     clearSelectedImage()
-    setIngredients([{ ...emptyIngredientDraft }])
-    setSteps([''])
+    setSections([makeEmptyRecipeSection()])
     setNotice(payload.is_published ? 'Рецепт опубликован.' : 'Черновик сохранён.')
     onRecipesChanged?.()
     setBusy(false)
@@ -568,14 +630,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
                 <label>Или ссылка на фото<input type="url" value={draft.image_url} onChange={(event) => setDraft({ ...draft, image_url: event.target.value })} placeholder="https://…" /></label>
               </div>
               <label>YouTube<input type="url" value={draft.youtube_url} onChange={(event) => setDraft({ ...draft, youtube_url: event.target.value })} placeholder="https://youtube.com/…" /></label>
-              <fieldset className="admin-rows"><legend>Ингредиенты</legend>{ingredients.map((item, index) => <div className="ingredient-editor" key={index}>
-                <div className="ingredient-row"><input aria-label="Название ингредиента" placeholder="Продукт" value={item.name} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, name: event.target.value } : row))} /><input type="number" min="0" step="0.001" aria-label="Количество" placeholder="Кол-во" value={item.quantity} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, quantity: event.target.value } : row))} /><select aria-label="Единица измерения" value={item.unit} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, unit: event.target.value } : row))}><option value="">Ед. изм.</option>{item.unit && !ingredientUnits.some((unit) => unit === item.unit) && <option value={item.unit}>{item.unit}</option>}{ingredientUnits.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select><input aria-label="Примечание к ингредиенту" placeholder="Примечание (например, Тип 405)" value={item.note} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, note: event.target.value } : row))} /><button type="button" className="admin-delete" aria-label="Убрать ингредиент" onClick={() => setIngredients((current) => current.length > 1 ? current.filter((_, rowIndex) => rowIndex !== index) : [{ ...emptyIngredientDraft }])}>×</button></div>
-                {item.alternative_open ? <div className="ingredient-alternative" id={`ingredient-alternative-${index}`}>
-                  <p>Замена · количество будет пересчитано вместе с рецептом</p>
-                  <div className="ingredient-alternative-row"><input aria-label="Название заменяющего ингредиента" placeholder="Например, сода" value={item.alternative_name} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_name: event.target.value } : row))} /><input type="number" min="0" step="0.01" aria-label="Количество заменяющего ингредиента" placeholder="Кол-во" value={item.alternative_quantity} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_quantity: event.target.value } : row))} /><select aria-label="Единица измерения замены" value={item.alternative_unit} onChange={(event) => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_unit: event.target.value } : row))}><option value="">Ед. изм.</option>{item.alternative_unit && !ingredientUnits.some((unit) => unit === item.alternative_unit) && <option value={item.alternative_unit}>{item.alternative_unit}</option>}{ingredientUnits.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select><button type="button" className="admin-delete" aria-label="Убрать замену" onClick={() => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_name: '', alternative_quantity: '', alternative_unit: '', alternative_open: false } : row))}>×</button></div>
-                </div> : <button type="button" className="ingredient-alternative-toggle" aria-expanded={false} aria-controls={`ingredient-alternative-${index}`} onClick={() => setIngredients((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, alternative_open: true } : row))}><span aria-hidden="true">＋</span> Добавить замену для пересчёта</button>}
-              </div>)}<button type="button" className="admin-add-row" onClick={() => setIngredients((current) => [...current, { ...emptyIngredientDraft }])}>+ Добавить ингредиент</button></fieldset>
-              <fieldset className="admin-rows"><legend>Шаги приготовления</legend>{steps.map((step, index) => <div className="step-row" key={index}><span>{index + 1}</span><textarea aria-label={`Шаг ${index + 1}`} rows={2} value={step} onChange={(event) => setSteps((current) => current.map((item, itemIndex) => itemIndex === index ? event.target.value : item))} /><button type="button" className="admin-delete" aria-label="Убрать шаг" onClick={() => setSteps((current) => current.length > 1 ? current.filter((_, itemIndex) => itemIndex !== index) : [''])}>×</button></div>)}<button type="button" className="admin-add-row" onClick={() => setSteps((current) => [...current, ''])}>+ Добавить шаг</button></fieldset>
+              <RecipeSectionsEditor sections={sections} setSections={setSections} />
               <label className="admin-publish"><input type="checkbox" checked={draft.is_published} onChange={(event) => setDraft({ ...draft, is_published: event.target.checked })} /> Опубликовать рецепт</label>
               {error && <p className="admin-error" role="alert">{error}</p>}{notice && !error && <p className="admin-notice" role="status">{notice}</p>}
               <button className="admin-primary" disabled={busy || !draft.title.trim() || !draft.category_id}>{busy ? 'Сохраняем…' : 'Сохранить рецепт'}</button>
