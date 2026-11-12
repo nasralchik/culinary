@@ -100,7 +100,7 @@ export function RecipeView({
           return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatAmount(ingredient, scaleFactor)}</span></li>
         })}</ul>}
       </div>}
-      {hasNamedSections ? visibleSections.map((section, sectionIndex) => <div className="recipe-detail-section recipe-named-section" key={section.id}>
+      {hasNamedSections ? visibleSections.map((section) => <div className="recipe-detail-section recipe-named-section" key={section.id}>
         {section.title.trim() && <h3>{section.title}</h3>}
         {section.ingredients.length > 0 && <><h4>Ингредиенты</h4><ul>{section.ingredients.map((ingredient) => {
           const missingUnit = ingredient.quantity != null && !validUnit(ingredient.unit)
@@ -108,7 +108,6 @@ export function RecipeView({
         })}</ul></>}
         {section.steps.length > 0 && <><h4>Приготовление</h4><ol>{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></>}
         {!section.title.trim() && section.ingredients.length === 0 && section.steps.length === 0 && <p className="recipe-empty">В этом разделе пока нет содержимого.</p>}
-        <span className="visually-hidden">Раздел {sectionIndex + 1}</span>
       </div>) : visibleSections.some((section) => section.steps.length > 0) && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{visibleSections.flatMap((section) => section.steps).map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
     </>}
     {pdfError && <p className="recipe-pdf-error" role="alert">{pdfError}</p>}
