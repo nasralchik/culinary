@@ -1,9 +1,8 @@
-import type { PublicRecipe, RecipeIngredient, RecipeStep } from '../data/recipeRepository'
+import type { PublicRecipe, RecipeIngredient, RecipeSection } from '../data/recipeRepository'
 
 interface RecipeViewProps {
   recipe: PublicRecipe
-  ingredients: RecipeIngredient[]
-  steps: RecipeStep[]
+  sections: RecipeSection[]
   loadingDetails: boolean
   recipeError: string
   pdfError: string
@@ -32,8 +31,7 @@ function validUnit(unit: string) {
 
 export function RecipeView({
   recipe,
-  ingredients,
-  steps,
+  sections,
   loadingDetails,
   recipeError,
   pdfError,
@@ -54,7 +52,10 @@ export function RecipeView({
   onShare,
   formatAmount,
 }: RecipeViewProps) {
+  const visibleSections = sections.filter((section) => section.title.trim() || section.ingredients.length > 0 || section.steps.length > 0)
+  const ingredients = visibleSections.flatMap((section) => section.ingredients)
   const scalableIngredients = ingredients.filter((ingredient) => ingredient.quantity != null && ingredient.quantity >= 0.01)
+  const hasNamedSections = visibleSections.some((section) => section.title.trim())
   const selectedIngredient = scalableIngredients.find((ingredient) => ingredient.id === scaleIngredientId) ?? scalableIngredients[0]
   const Title = standalone ? 'h1' : 'h2'
 
@@ -82,7 +83,7 @@ export function RecipeView({
       <span>{shareNotice}</span>
     </div>}
     {loadingDetails ? <p className="recipe-empty" role="status">Загружаем рецепт…</p> : <>
-      {ingredients.length > 0 && <div className="recipe-detail-section"><h3>Ингредиенты</h3>
+      {ingredients.length > 0 && <div className={hasNamedSections ? 'recipe-scaler-wrapper' : 'recipe-detail-section'}>{!hasNamedSections && <h3>Ингредиенты</h3>}
         {showScaler && selectedIngredient && <div className="recipe-scaler" id="recipe-scaler">
           <div className="recipe-scaler-heading"><strong>Изменить количество</strong><span>Остальные ингредиенты пересчитаются пропорционально.</span></div>
           <div className="recipe-scaler-controls">
@@ -94,12 +95,21 @@ export function RecipeView({
             <button type="button" className="recipe-scaler-reset" onClick={onResetScale}>Исходное количество</button>
           </div>
         </div>}
-        <ul>{ingredients.map((ingredient) => {
+        {!hasNamedSections && <ul>{ingredients.map((ingredient) => {
           const missingUnit = ingredient.quantity != null && !validUnit(ingredient.unit)
           return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatAmount(ingredient, scaleFactor)}</span></li>
-        })}</ul>
+        })}</ul>}
       </div>}
-      {steps.length > 0 && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
+      {hasNamedSections ? visibleSections.map((section, sectionIndex) => <div className="recipe-detail-section recipe-named-section" key={section.id}>
+        {section.title.trim() && <h3>{section.title}</h3>}
+        {section.ingredients.length > 0 && <><h4>Ингредиенты</h4><ul>{section.ingredients.map((ingredient) => {
+          const missingUnit = ingredient.quantity != null && !validUnit(ingredient.unit)
+          return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatAmount(ingredient, scaleFactor)}</span></li>
+        })}</ul></>}
+        {section.steps.length > 0 && <><h4>Приготовление</h4><ol>{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></>}
+        {!section.title.trim() && section.ingredients.length === 0 && section.steps.length === 0 && <p className="recipe-empty">В этом разделе пока нет содержимого.</p>}
+        <span className="visually-hidden">Раздел {sectionIndex + 1}</span>
+      </div>) : visibleSections.some((section) => section.steps.length > 0) && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{visibleSections.flatMap((section) => section.steps).map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
     </>}
     {pdfError && <p className="recipe-pdf-error" role="alert">{pdfError}</p>}
     {recipeError && <p className="admin-error" role="alert">{recipeError}</p>}
