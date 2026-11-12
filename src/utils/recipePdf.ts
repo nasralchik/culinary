@@ -8,6 +8,7 @@ interface RecipePdfData {
   recipe: PublicRecipe
   sections: Array<{
     title: string
+    stepListStyle: 'numbered' | 'bulleted'
     ingredients: Array<{ name: string; amount: string }>
     steps: string[]
   }>
@@ -62,15 +63,22 @@ export async function downloadRecipePdfFile({ recipe, sections }: RecipePdfData)
 
     if (section.steps.length) {
       content.push({ text: 'Приготовление', style: named ? 'subsectionTitle' : 'sectionTitle', margin: [0, named ? 16 : 25, 0, 10], keepWithNext: true })
-      section.steps.forEach((instruction, index) => content.push({
-        columns: [
-          { text: `${index + 1}.`, width: 28, style: 'stepNumber' },
-          { text: instruction, style: 'stepText' },
-        ],
-        columnGap: 6,
-        margin: [0, 0, 0, 11],
-        unbreakable: true,
-      }))
+      if (section.stepListStyle === 'bulleted') {
+        content.push({
+          ul: section.steps.map((instruction) => ({ text: instruction, style: 'stepText' })),
+          margin: [0, 0, 0, 11],
+        })
+      } else {
+        section.steps.forEach((instruction, index) => content.push({
+          columns: [
+            { text: `${index + 1}.`, width: 28, style: 'stepNumber' },
+            { text: instruction, style: 'stepText' },
+          ],
+          columnGap: 6,
+          margin: [0, 0, 0, 11],
+          unbreakable: true,
+        }))
+      }
     }
   })
 
