@@ -15,6 +15,7 @@ export interface RecipeSectionDraft {
   key: string
   id?: string
   title: string
+  stepsTitle: string
   stepListStyle: 'numbered' | 'bulleted'
   ingredients: IngredientDraft[]
   steps: string[]
@@ -29,6 +30,7 @@ export function makeEmptyRecipeSection(title = ''): RecipeSectionDraft {
   return {
     key: `section-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     title,
+    stepsTitle: 'Приготовление',
     stepListStyle: 'numbered',
     ingredients: [{ ...emptyIngredientDraft }],
     steps: [''],
@@ -96,13 +98,16 @@ export function RecipeSectionsEditor({ sections, setSections }: RecipeSectionsEd
         })}
         <button type="button" className="admin-add-row" onClick={() => updateSection(sectionIndex, (current) => ({ ...current, ingredients: [...current.ingredients, { ...emptyIngredientDraft }] }))}>+ Добавить ингредиент</button>
       </fieldset>
-      <fieldset className="admin-rows recipe-section-rows"><legend>Шаги приготовления</legend>
-        <label className="step-list-style">Формат списка
-          <select value={section.stepListStyle} onChange={(event) => updateSection(sectionIndex, (current) => ({ ...current, stepListStyle: event.target.value as RecipeSectionDraft['stepListStyle'] }))}>
-            <option value="numbered">Нумерованный список</option>
-            <option value="bulleted">Список с маркерами</option>
-          </select>
-        </label>
+      <fieldset className="admin-rows recipe-section-rows"><legend>Список</legend>
+        <div className="step-list-toolbar">
+          <label className="step-list-title">Заголовок списка
+            <input value={section.stepsTitle} placeholder="Приготовление" onChange={(event) => updateSection(sectionIndex, (current) => ({ ...current, stepsTitle: event.target.value }))} />
+          </label>
+          <div className="step-list-style" role="group" aria-label="Формат списка">
+            <button type="button" aria-label="Нумерованный список" title="Нумерованный список" aria-pressed={section.stepListStyle === 'numbered'} onClick={() => updateSection(sectionIndex, (current) => ({ ...current, stepListStyle: 'numbered' }))}>1.</button>
+            <button type="button" aria-label="Список с маркерами" title="Список с маркерами" aria-pressed={section.stepListStyle === 'bulleted'} onClick={() => updateSection(sectionIndex, (current) => ({ ...current, stepListStyle: 'bulleted' }))}>•</button>
+          </div>
+        </div>
         {section.steps.map((step, stepIndex) => <div className="step-row" key={`${section.key}-step-${stepIndex}`}>
           <span aria-hidden="true">{section.stepListStyle === 'bulleted' ? '•' : stepIndex + 1}</span>
           <textarea aria-label={`Шаг ${stepIndex + 1} раздела ${section.title || sectionIndex + 1}`} rows={2} value={step} onChange={(event) => updateSection(sectionIndex, (current) => ({ ...current, steps: current.steps.map((currentStep, index) => index === stepIndex ? event.target.value : currentStep) }))} />
