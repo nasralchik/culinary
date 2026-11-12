@@ -37,17 +37,16 @@ export function PwaInstallPrompt() {
 
   return createPortal(
     <>
-      {!pwaState.installed && !dismissed && <aside className="pwa-install-prompt" aria-label="Установка приложения">
-        <img className="pwa-install-icon" src={`${import.meta.env.BASE_URL}icon.svg`} alt="" />
-        <div className="pwa-install-copy">
-          <strong>Кулинарная библиотека</strong>
-          <span>{showHelp ? manualInstallInstructions() : 'Установите библиотеку на телефон — рецепты всегда будут под рукой.'}</span>
-        </div>
-        <button className="pwa-install-action" type="button" onClick={() => void install()}>
-          {showHelp ? 'Понятно' : 'Установить'}
+      {!pwaState.installed && !dismissed && <div className="pwa-install-wrap">
+        {showHelp && <aside className="pwa-install-help" role="status">
+          <span>{manualInstallInstructions()}</span>
+          <button type="button" aria-label="Закрыть подсказку" onClick={() => setDismissed(true)}>×</button>
+        </aside>}
+        <button className="pwa-install-prompt" type="button" onClick={() => void install()}>
+          <span className="pwa-install-prompt-icon" aria-hidden="true">📱</span>
+          <span>Установить приложение</span>
         </button>
-        <button className="pwa-prompt-close" type="button" aria-label="Закрыть" onClick={() => setDismissed(true)}>×</button>
-      </aside>}
+      </div>}
 
       {pwaState.updateAvailable && !updateDismissed && <aside className="pwa-update-notification" role="status">
         <span>Доступна новая версия библиотеки.</span>
