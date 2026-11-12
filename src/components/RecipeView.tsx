@@ -106,9 +106,14 @@ export function RecipeView({
           const missingUnit = ingredient.quantity != null && !validUnit(ingredient.unit)
           return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatAmount(ingredient, scaleFactor)}</span></li>
         })}</ul></>}
-        {section.steps.length > 0 && <><h4>Приготовление</h4><ol>{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></>}
+        {section.steps.length > 0 && <><h4>Приготовление</h4>{section.step_list_style === 'bulleted'
+          ? <ul className="recipe-steps">{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ul>
+          : <ol className="recipe-steps">{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol>}
+        </>}
         {!section.title.trim() && section.ingredients.length === 0 && section.steps.length === 0 && <p className="recipe-empty">В этом разделе пока нет содержимого.</p>}
-      </div>) : visibleSections.some((section) => section.steps.length > 0) && <div className="recipe-detail-section"><h3>Приготовление</h3><ol>{visibleSections.flatMap((section) => section.steps).map((step) => <li key={step.id}>{step.instruction}</li>)}</ol></div>}
+      </div>) : visibleSections.some((section) => section.steps.length > 0) && <div className="recipe-detail-section"><h3>Приготовление</h3>{visibleSections.map((section) => section.steps.length > 0 && (section.step_list_style === 'bulleted'
+        ? <ul className="recipe-steps" key={section.id}>{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ul>
+        : <ol className="recipe-steps" key={section.id}>{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol>))}</div>}
     </>}
     {pdfError && <p className="recipe-pdf-error" role="alert">{pdfError}</p>}
     {recipeError && <p className="admin-error" role="alert">{recipeError}</p>}

@@ -15,6 +15,7 @@ export interface RecipeSectionDraft {
   key: string
   id?: string
   title: string
+  stepListStyle: 'numbered' | 'bulleted'
   ingredients: IngredientDraft[]
   steps: string[]
 }
@@ -28,6 +29,7 @@ export function makeEmptyRecipeSection(title = ''): RecipeSectionDraft {
   return {
     key: `section-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     title,
+    stepListStyle: 'numbered',
     ingredients: [{ ...emptyIngredientDraft }],
     steps: [''],
   }
@@ -95,8 +97,14 @@ export function RecipeSectionsEditor({ sections, setSections }: RecipeSectionsEd
         <button type="button" className="admin-add-row" onClick={() => updateSection(sectionIndex, (current) => ({ ...current, ingredients: [...current.ingredients, { ...emptyIngredientDraft }] }))}>+ Добавить ингредиент</button>
       </fieldset>
       <fieldset className="admin-rows recipe-section-rows"><legend>Шаги приготовления</legend>
+        <label className="step-list-style">Формат списка
+          <select value={section.stepListStyle} onChange={(event) => updateSection(sectionIndex, (current) => ({ ...current, stepListStyle: event.target.value as RecipeSectionDraft['stepListStyle'] }))}>
+            <option value="numbered">Нумерованный список</option>
+            <option value="bulleted">Список с маркерами</option>
+          </select>
+        </label>
         {section.steps.map((step, stepIndex) => <div className="step-row" key={`${section.key}-step-${stepIndex}`}>
-          <span>{stepIndex + 1}</span>
+          <span aria-hidden="true">{section.stepListStyle === 'bulleted' ? '•' : stepIndex + 1}</span>
           <textarea aria-label={`Шаг ${stepIndex + 1} раздела ${section.title || sectionIndex + 1}`} rows={2} value={step} onChange={(event) => updateSection(sectionIndex, (current) => ({ ...current, steps: current.steps.map((currentStep, index) => index === stepIndex ? event.target.value : currentStep) }))} />
           <button type="button" className="admin-delete" aria-label="Убрать шаг" onClick={() => updateSection(sectionIndex, (current) => ({ ...current, steps: current.steps.length > 1 ? current.steps.filter((_, index) => index !== stepIndex) : [''] }))}>×</button>
         </div>)}

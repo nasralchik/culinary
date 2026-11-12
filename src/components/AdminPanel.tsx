@@ -219,7 +219,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
     setBusy(true)
     setError('')
     const [sectionResult, ingredientResult, stepResult] = await Promise.all([
-      supabase.from('recipe_sections').select('id,title,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
+      supabase.from('recipe_sections').select('id,title,sort_order,step_list_style').eq('recipe_id', recipe.id).order('sort_order'),
       supabase.from('recipe_ingredients').select('section_id,name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit,sort_order').eq('recipe_id', recipe.id).order('sort_order'),
       supabase.from('recipe_steps').select('section_id,instruction,step_number').eq('recipe_id', recipe.id).order('step_number'),
     ])
@@ -237,6 +237,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
         ...makeEmptyRecipeSection(section.title ?? ''),
         id: section.id,
         title: section.title ?? '',
+        stepListStyle: section.step_list_style === 'bulleted' ? 'bulleted' : 'numbered',
         ingredients: (ingredientResult.data ?? []).filter((item) => item.section_id === section.id).map((item): IngredientDraft => ({
           name: item.name,
           quantity: item.quantity == null ? '' : String(item.quantity),
@@ -475,7 +476,12 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
       recipeId = data.id
     }
 
-    const sectionRows = sections.map((section, index) => ({ recipe_id: recipeId, title: section.title.trim(), sort_order: index }))
+    const sectionRows = sections.map((section, index) => ({
+      recipe_id: recipeId,
+      title: section.title.trim(),
+      sort_order: index,
+      step_list_style: section.stepListStyle,
+    }))
     const { data: createdSections, error: createSectionsError } = await supabase
       .from('recipe_sections')
       .insert(sectionRows)
