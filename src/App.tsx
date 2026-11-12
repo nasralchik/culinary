@@ -187,6 +187,7 @@ function App() {
         recipe: selectedRecipe,
         sections: recipeSections.map((section) => ({
           title: section.title,
+          stepListStyle: section.step_list_style,
           ingredients: section.ingredients.map((ingredient) => ({
             name: ingredient.name,
             amount: formatIngredientAmount(ingredient, scaleFactor),
