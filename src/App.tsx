@@ -115,6 +115,22 @@ function App() {
     return matchesCategory && matchesSearch
   }), [category, recipes, search])
 
+  const searchSuggestions = useMemo(() => {
+    const term = search.trim().toLocaleLowerCase('ru')
+    const titleMatchScore = (title: string) => {
+      const normalizedTitle = title.toLocaleLowerCase('ru')
+      if (normalizedTitle === term) return 0
+      if (normalizedTitle.startsWith(term)) return 1
+      if (normalizedTitle.includes(term)) return 2
+      return 3
+    }
+
+    return [...filteredRecipes]
+      .sort((left, right) => titleMatchScore(left.title) - titleMatchScore(right.title) || left.title.localeCompare(right.title, 'ru'))
+      .slice(0, 6)
+      .map(({ id, title, summary, category: recipeCategory }) => ({ id, title, summary, category: recipeCategory }))
+  }, [filteredRecipes, search])
+
   const recipeBooks = useMemo(() => filteredRecipes.map((recipe): RecipeBook => {
     const recipeIndex = recipes.findIndex((item) => item.id === recipe.id)
     const palette = recipeCoverPalettes[recipeIndex % recipeCoverPalettes.length]
@@ -206,18 +222,26 @@ function App() {
     setScaleAdjusted(false)
   }
 
+  const openRecipe = (recipeId: string) => {
+    setRecipeError('')
+    setShareUrl('')
+    setShareNotice('')
+    setSharedRecipeId(null)
+    setSelectedRecipeId(recipeId)
+  }
+
   return (
     <div className="app-shell" id="home">
       <div className="paper-grain" aria-hidden="true" />
       {!sharedRecipeId && <main id="library">
         <section className="library-section" aria-label="Коллекция рецептов">
           <div className="library-toolbar">
-            <div className="library-tools"><SearchBar value={search} onChange={setSearch} /><button className="admin-entry" aria-label="Админ-панель" title="Админ-панель" onClick={() => setShowAdmin(true)}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2m0 15v2M2.5 12h2m15 0h2M5.3 5.3l1.4 1.4m10.6 10.6 1.4 1.4m0-13.4-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg></button></div>
+            <div className="library-tools"><SearchBar value={search} suggestions={searchSuggestions} onChange={setSearch} onSelect={openRecipe} /><button className="admin-entry" aria-label="Админ-панель" title="Админ-панель" onClick={() => setShowAdmin(true)}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2m0 15v2M2.5 12h2m15 0h2M5.3 5.3l1.4 1.4m10.6 10.6 1.4 1.4m0-13.4-1.4 1.4M6.7 17.3l-1.4 1.4"/></svg></button></div>
             <CategoryFilter categories={[ALL_RECIPES_LABEL, ...availableCategories]} selected={category} onSelect={setCategory} />
           </div>
           {loadingLibrary ? <div className="empty-state" role="status"><span>⌛</span><h3>Загружаем рецепты</h3><p>Открываем страницы нашей кулинарной библиотеки.</p></div>
             : libraryError ? <div className="empty-state" role="alert"><span>⌕</span><h3>Библиотека временно недоступна</h3><p>{libraryError}</p></div>
-              : recipeBooks.length > 0 ? <Bookshelf books={recipeBooks} categories={availableCategories} selectedCategory={category} onBookSelect={(book) => { setRecipeError(''); setShareUrl(''); setShareNotice(''); setSharedRecipeId(null); setSelectedRecipeId(book.id) }} />
+              : recipeBooks.length > 0 ? <Bookshelf books={recipeBooks} categories={availableCategories} selectedCategory={category} onBookSelect={(book) => openRecipe(book.id)} />
                 : <div className="empty-state"><span>⌕</span><h3>{recipes.length === 0 ? 'Рецептов пока нет' : 'Ничего не найдено'}</h3><p>{recipes.length === 0 ? 'Опубликованные рецепты появятся здесь отдельными книгами.' : 'Измените поиск или выберите другую категорию.'}</p></div>}
         </section>
       </main>}
