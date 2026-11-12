@@ -34,6 +34,7 @@ export interface RecipeStep {
 export interface RecipeSection {
   id: string
   title: string
+  steps_title: string
   sort_order: number
   step_list_style: 'numbered' | 'bulleted'
   ingredients: RecipeIngredient[]
@@ -78,7 +79,7 @@ export async function getRecipeDetails(recipeId: string): Promise<{ sections: Re
   if (!supabase) return { sections: [] }
 
   const [sectionResult, ingredientResult, stepResult] = await Promise.all([
-    supabase.from('recipe_sections').select('id,title,sort_order,step_list_style').eq('recipe_id', recipeId).order('sort_order'),
+    supabase.from('recipe_sections').select('id,title,steps_title,sort_order,step_list_style').eq('recipe_id', recipeId).order('sort_order'),
     supabase.from('recipe_ingredients').select('id,section_id,name,quantity,unit,note,alternative_name,alternative_quantity,alternative_unit,sort_order').eq('recipe_id', recipeId).order('sort_order'),
     supabase.from('recipe_steps').select('id,section_id,step_number,instruction').eq('recipe_id', recipeId).order('step_number'),
   ])
@@ -89,6 +90,7 @@ export async function getRecipeDetails(recipeId: string): Promise<{ sections: Re
   const sections: RecipeSection[] = (sectionResult.data ?? []).map((section) => ({
     id: section.id,
     title: section.title ?? '',
+    steps_title: section.steps_title ?? 'Приготовление',
     sort_order: section.sort_order,
     step_list_style: section.step_list_style === 'bulleted' ? 'bulleted' : 'numbered',
     ingredients: [],
