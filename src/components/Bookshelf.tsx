@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { RecipeBook } from '../types/recipe'
 import { ALL_RECIPES_LABEL } from '../data/books'
 import { BookSpine } from './BookSpine'
@@ -7,6 +8,73 @@ interface BookshelfProps {
   categories: string[]
   selectedCategory: string
   onBookSelect: (book: RecipeBook) => void
+}
+
+interface ShelfBooksCarouselProps {
+  books: RecipeBook[]
+  category: string
+  onBookSelect: (book: RecipeBook) => void
+}
+
+function ShelfBooksCarousel({ books, category, onBookSelect }: ShelfBooksCarouselProps) {
+  const stripRef = useRef<HTMLDivElement>(null)
+  const [scrollState, setScrollState] = useState({ canScroll: false, atStart: true, atEnd: true })
+
+  useEffect(() => {
+    const strip = stripRef.current
+    if (!strip) return
+
+    const updateScrollState = () => {
+      const cardWidths = Array.from(strip.children).reduce((total, child) => total + child.getBoundingClientRect().width, 0)
+      const gap = Number.parseFloat(window.getComputedStyle(strip).columnGap) || 0
+      const mobileGutter = window.matchMedia('(max-width: 760px)').matches ? 20 : 0
+      const canScroll = cardWidths + Math.max(0, strip.children.length - 1) * gap > strip.clientWidth - mobileGutter + 1
+      const maxScroll = strip.scrollWidth - strip.clientWidth
+      const nextState = { canScroll, atStart: strip.scrollLeft <= 1, atEnd: strip.scrollLeft >= maxScroll - 1 }
+
+      setScrollState((current) => current.canScroll === nextState.canScroll && current.atStart === nextState.atStart && current.atEnd === nextState.atEnd
+        ? current
+        : nextState)
+    }
+
+    updateScrollState()
+    strip.addEventListener('scroll', updateScrollState, { passive: true })
+    window.addEventListener('resize', updateScrollState)
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateScrollState)
+    observer?.observe(strip)
+
+    return () => {
+      strip.removeEventListener('scroll', updateScrollState)
+      window.removeEventListener('resize', updateScrollState)
+      observer?.disconnect()
+    }
+  }, [books.length])
+
+  function scrollByBook(direction: -1 | 1) {
+    const strip = stripRef.current
+    const firstBook = strip?.querySelector<HTMLElement>('.book-wrap')
+    if (!strip || !firstBook) return
+
+    const gap = Number.parseFloat(window.getComputedStyle(strip).columnGap) || 0
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    strip.scrollBy({ left: direction * (firstBook.getBoundingClientRect().width + gap), behavior })
+  }
+
+  return <div className={`shelf-books-viewport${scrollState.canScroll ? ' is-scrollable' : ''}`}>
+    {scrollState.canScroll && <>
+      <button className="shelf-slide-control shelf-slide-previous" type="button" aria-label={`Предыдущие книги на полке «${category}»`} title="Предыдущие книги" disabled={scrollState.atStart} onClick={() => scrollByBook(-1)}>‹</button>
+      <button className="shelf-slide-control shelf-slide-next" type="button" aria-label={`Следующие книги на полке «${category}»`} title="Следующие книги" disabled={scrollState.atEnd} onClick={() => scrollByBook(1)}>›</button>
+    </>}
+    <div
+      className="shelf-books"
+      ref={stripRef}
+      role="group"
+      aria-label={`Рецепты категории «${category}»`}
+      tabIndex={scrollState.canScroll ? 0 : undefined}
+    >
+      {books.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
+    </div>
+  </div>
 }
 
 export function Bookshelf({ books, categories, selectedCategory, onBookSelect }: BookshelfProps) {
@@ -64,9 +132,7 @@ export function Bookshelf({ books, categories, selectedCategory, onBookSelect }:
         return (
           <div className={`shelf-row${nextRow ? '' : ' shelf-row-last'}${row.books.length === 0 ? ' shelf-row-empty' : ''}`} key={row.category}>
             {row.books.length > 0 ? (
-              <div className="shelf-books" data-book-count={row.books.length}>
-                {row.books.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
-              </div>
+              <ShelfBooksCarousel books={row.books} category={row.category} onBookSelect={onBookSelect} />
             ) : (
               <p className="shelf-empty-category">В этой категории пока нет рецептов</p>
             )}
