@@ -1,4 +1,5 @@
 import type { PublicRecipe, RecipeIngredient, RecipeSection } from '../data/recipeRepository'
+import { FormattedText } from './FormattedText'
 
 interface RecipeViewProps {
   recipe: PublicRecipe
@@ -77,7 +78,7 @@ export function RecipeView({
     <Title className="recipe-view-title" id={standalone ? 'shared-recipe-title' : 'dialog-title'}>{recipe.title}</Title>
     {recipe.summary && <p className="recipe-summary">{recipe.summary}</p>}
     {recipe.image_url && <img className="recipe-image" src={recipe.image_url} alt={recipe.title} />}
-    {recipe.description && <p className="recipe-description">{recipe.description}</p>}
+    {recipe.description && <p className="recipe-description"><FormattedText text={recipe.description} /></p>}
     {shareUrl && <div className="recipe-share-result" role="status">
       <label>Ссылка на рецепт<input readOnly value={shareUrl} onFocus={(event) => event.currentTarget.select()} aria-label="Ссылка для отправки рецепта" /></label>
       <span>{shareNotice}</span>
@@ -107,15 +108,15 @@ export function RecipeView({
           return <li key={ingredient.id}><span>{ingredient.name}</span><span className={missingUnit ? 'ingredient-amount ingredient-unit-missing' : 'ingredient-amount'}>{formatAmount(ingredient, scaleFactor)}</span></li>
         })}</ul></>}
         {section.steps.length > 0 && <>{section.steps_title.trim() && <h4>{section.steps_title}</h4>}{section.step_list_style === 'bulleted'
-          ? <ul className="recipe-steps">{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ul>
-          : <ol className="recipe-steps">{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol>}
+          ? <ul className="recipe-steps">{section.steps.map((step) => <li key={step.id}><FormattedText text={step.instruction} /></li>)}</ul>
+          : <ol className="recipe-steps">{section.steps.map((step) => <li key={step.id}><FormattedText text={step.instruction} /></li>)}</ol>}
         </>}
         {!section.title.trim() && section.ingredients.length === 0 && section.steps.length === 0 && <p className="recipe-empty">В этом разделе пока нет содержимого.</p>}
       </div>) : visibleSections.some((section) => section.steps.length > 0) && <div className="recipe-detail-section">{visibleSections.map((section) => section.steps.length > 0 && <div className="recipe-step-group" key={section.id}>
         {section.steps_title.trim() && <h3>{section.steps_title}</h3>}
         {section.step_list_style === 'bulleted'
-          ? <ul className="recipe-steps">{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ul>
-          : <ol className="recipe-steps">{section.steps.map((step) => <li key={step.id}>{step.instruction}</li>)}</ol>}
+          ? <ul className="recipe-steps">{section.steps.map((step) => <li key={step.id}><FormattedText text={step.instruction} /></li>)}</ul>
+          : <ol className="recipe-steps">{section.steps.map((step) => <li key={step.id}><FormattedText text={step.instruction} /></li>)}</ol>}
       </div>)}</div>}
     </>}
     {pdfError && <p className="recipe-pdf-error" role="alert">{pdfError}</p>}

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { ALL_RECIPES_LABEL } from '../data/books'
 import { SearchBar, type SearchSuggestion } from './SearchBar'
 import { makeEmptyRecipeSection, RecipeSectionsEditor, type IngredientDraft, type RecipeSectionDraft } from './RecipeSectionsEditor'
+import { FormattedTextarea } from './FormattedTextarea'
 
 interface CategoryRow {
   id: string
@@ -617,7 +618,7 @@ export function AdminPanel({ onClose, onRecipesChanged }: { onClose: () => void;
               <label>Название<input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} required /></label>
               <label>Категория<select value={draft.category_id} onChange={(event) => setDraft({ ...draft, category_id: event.target.value })} required><option value="" disabled>Выберите категорию</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
               <label>Краткое описание<input value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} /></label>
-              <label>Описание<textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} /></label>
+              <label>Описание<FormattedTextarea ariaLabel="Описание рецепта" rows={3} value={draft.description} onChange={(value) => setDraft((current) => ({ ...current, description: value }))} /></label>
               <div className="admin-image-field">
                 <span className="admin-image-label">Фотография рецепта</span>
                 <div className="admin-image-controls">
