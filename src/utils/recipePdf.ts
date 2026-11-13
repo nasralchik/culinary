@@ -1,6 +1,7 @@
 import pdfMake from 'pdfmake/build/pdfmake'
 import pdfFonts from 'pdfmake/build/vfs_fonts'
 import type { PublicRecipe } from '../data/recipeRepository'
+import { parseInlineText } from './inlineText'
 
 pdfMake.addVirtualFileSystem(pdfFonts)
 
@@ -20,6 +21,15 @@ function safeFileName(title: string) {
   return `${cleaned || 'recept'}.pdf`
 }
 
+function formattedPdfText(value: string) {
+  return parseInlineText(value).map((part) => ({
+    text: part.text,
+    ...(part.format === 'bold' ? { bold: true } : {}),
+    ...(part.format === 'italic' ? { italics: true } : {}),
+    ...(part.format === 'highlight' ? { background: '#F1D98A' } : {}),
+  }))
+}
+
 export async function downloadRecipePdfFile({ recipe, sections }: RecipePdfData) {
   const content: unknown[] = [
     { text: recipe.category.toLocaleUpperCase('ru-RU'), style: 'category', margin: [0, 0, 0, 10] },
@@ -27,7 +37,7 @@ export async function downloadRecipePdfFile({ recipe, sections }: RecipePdfData)
   ]
 
   if (recipe.summary) content.push({ text: recipe.summary, style: 'subtitle', margin: [0, 0, 0, 23] })
-  if (recipe.description.trim()) content.push({ text: recipe.description.trim(), style: 'description', margin: [0, 0, 0, 20] })
+  if (recipe.description.trim()) content.push({ text: formattedPdfText(recipe.description.trim()), style: 'description', margin: [0, 0, 0, 20] })
 
   sections.filter((section) => section.title.trim() || section.ingredients.length > 0 || section.steps.length > 0).forEach((section) => {
     const named = section.title.trim().length > 0
@@ -67,14 +77,14 @@ export async function downloadRecipePdfFile({ recipe, sections }: RecipePdfData)
       if (stepsTitle) content.push({ text: stepsTitle, style: named ? 'subsectionTitle' : 'sectionTitle', margin: [0, named ? 16 : 25, 0, 10], keepWithNext: true })
       if (section.stepListStyle === 'bulleted') {
         content.push({
-          ul: section.steps.map((instruction) => ({ text: instruction, style: 'stepText' })),
+          ul: section.steps.map((instruction) => ({ text: formattedPdfText(instruction), style: 'stepText' })),
           margin: [0, 0, 0, 11],
         })
       } else {
         section.steps.forEach((instruction, index) => content.push({
           columns: [
             { text: `${index + 1}.`, width: 28, style: 'stepNumber' },
-            { text: instruction, style: 'stepText' },
+            { text: formattedPdfText(instruction), style: 'stepText' },
           ],
           columnGap: 6,
           margin: [0, 0, 0, 11],
