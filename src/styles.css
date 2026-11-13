@@ -719,8 +719,25 @@ main { position: relative; z-index: 1; }
   .shelf-cabinet { --cabinet-inset: 17px; }
   .cabinet-crown { height: 62px; }
   .shelf-row { padding-inline: 5px; }
-  .shelf-books { column-gap: 10px; row-gap: 16px; }
-  .book-wrap { flex-basis: 148px; height: 148px; }
+  .shelf-books {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: normal;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-inline: 10px;
+    column-gap: 10px;
+    row-gap: 0;
+    overscroll-behavior-x: contain;
+    scroll-behavior: smooth;
+    scroll-padding-inline: 10px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .shelf-books::-webkit-scrollbar { display: none; }
+  .book-wrap { flex-basis: 148px; height: 148px; scroll-snap-align: center; scroll-snap-stop: always; }
+  .shelf-books[data-book-count="1"] { justify-content: center; }
   .book-cover-layout { inset: 9px 6px 7px; grid-template-rows: 4px 14px auto 38px 11px 4px; }
   .book-art { width: 66px; height: 38px; }
   .book-copy { gap: 8px; padding-left: 8px; }
@@ -756,7 +773,7 @@ main { position: relative; z-index: 1; }
   .cabinet-crown::before { inset: 4px 6px 8px; }
   .crown-carving { width: calc(100% - 14px); }
   .shelf-row { padding-inline: 2px; }
-  .shelf-books { column-gap: 8px; row-gap: 14px; }
+  .shelf-books { column-gap: 8px; }
   .book-wrap { flex-basis: 138px; height: 138px; }
   .book-spine::before { inset: 7px 6px; }
   .book-spine::after { top: 7px; bottom: 7px; }
@@ -793,6 +810,12 @@ main { position: relative; z-index: 1; }
   .ingredient-alternative-row { grid-template-columns: minmax(0, 1.3fr) minmax(64px, .7fr) minmax(75px, .8fr) 26px; }
   .admin-image-controls { grid-template-columns: minmax(0, 1fr); }
   .admin-image-preview { width: min(100%, 260px); min-height: 110px; }
+}
+@media (min-width: 360px) and (max-width: 760px) {
+  .shelf-books[data-book-count="2"] { justify-content: center; }
+}
+@media (max-width: 359px) {
+  .shelf-books[data-book-count="2"] { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
