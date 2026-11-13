@@ -64,7 +64,7 @@ export function Bookshelf({ books, categories, selectedCategory, onBookSelect }:
         return (
           <div className={`shelf-row${nextRow ? '' : ' shelf-row-last'}${row.books.length === 0 ? ' shelf-row-empty' : ''}`} key={row.category}>
             {row.books.length > 0 ? (
-              <div className="shelf-books">
+              <div className="shelf-books" data-book-count={row.books.length}>
                 {row.books.map((book) => <div className="book-wrap" key={book.id} onClick={() => onBookSelect(book)}><BookSpine book={book} /></div>)}
               </div>
             ) : (
