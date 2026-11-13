@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react'
+import { FormattedTextarea } from './FormattedTextarea'
 
 export interface IngredientDraft {
   name: string
@@ -110,7 +111,7 @@ export function RecipeSectionsEditor({ sections, setSections }: RecipeSectionsEd
         </div>
         {section.steps.map((step, stepIndex) => <div className="step-row" key={`${section.key}-step-${stepIndex}`}>
           <span aria-hidden="true">{section.stepListStyle === 'bulleted' ? '•' : stepIndex + 1}</span>
-          <textarea aria-label={`Шаг ${stepIndex + 1} раздела ${section.title || sectionIndex + 1}`} rows={2} value={step} onChange={(event) => updateSection(sectionIndex, (current) => ({ ...current, steps: current.steps.map((currentStep, index) => index === stepIndex ? event.target.value : currentStep) }))} />
+          <FormattedTextarea ariaLabel={`Шаг ${stepIndex + 1} раздела ${section.title || sectionIndex + 1}`} rows={2} value={step} onChange={(value) => updateSection(sectionIndex, (current) => ({ ...current, steps: current.steps.map((currentStep, index) => index === stepIndex ? value : currentStep) }))} />
           <button type="button" className="admin-delete" aria-label="Убрать шаг" onClick={() => updateSection(sectionIndex, (current) => ({ ...current, steps: current.steps.length > 1 ? current.steps.filter((_, index) => index !== stepIndex) : [''] }))}>×</button>
         </div>)}
         <button type="button" className="admin-add-row" onClick={() => updateSection(sectionIndex, (current) => ({ ...current, steps: [...current.steps, ''] }))}>+ Добавить шаг</button>
